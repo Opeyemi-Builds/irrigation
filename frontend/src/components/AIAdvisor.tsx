@@ -3,8 +3,7 @@ import { Send, Bot, User, Loader, Sparkles } from 'lucide-react';
 import { AIMessage } from '../types';
 import { mockDashboardData } from '../data/mockData';
 
-const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
-
+const API_BASE = (import.meta as any).env.VITE_API_BASE_URL || 'http://localhost:8000';
 const SUGGESTIONS = [
   'Should I irrigate today?',
   'Why is my soil moisture dropping?',

@@ -73,7 +73,7 @@ How this affects your schedule:
 Is there anything specific you'd like to go deeper on?`,
 };
 
-const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
+const API_BASE = (import.meta as any).env.VITE_API_BASE_URL || 'http://localhost:8000';
 
 const getResponse = (text: string): string => {
   const l = text.toLowerCase();
