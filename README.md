@@ -49,7 +49,7 @@ flowchart LR
     subgraph FIELD["Field unit — ESP32"]
         SENSORS["DHT21 · soil probe · HC-SR04"] --> MCU["Firmware<br/>control loop"]
         MCU -->|"hysteresis"| PUMP["Relay → pump"]
-        MCU --> TFT["1.8&quot; TFT<br/>local readout"]
+        MCU --> TFT["1.8-inch TFT<br/>local readout"]
     end
 
     MCU -->|"HTTPS POST /telemetry · every 5 s"| API
