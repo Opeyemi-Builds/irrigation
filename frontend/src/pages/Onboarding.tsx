@@ -3,7 +3,7 @@ import {
   ArrowRight, ArrowLeft, Check, Plus, X,
   Eye, EyeOff, Cpu, Leaf, Sprout, Loader2
 } from 'lucide-react';
-import { CROPS, GROWTH_STAGES, SOIL_TYPES, saveFarmProfile, cropLabel } from '../lib/farm';
+import { CROPS, GROWTH_STAGES, SOIL_TYPES, saveFarmProfile, upsertCloudProfile, cropLabel } from '../lib/farm';
 import { signUp } from '../lib/auth';
 import { useIsMobile } from '../hooks/useIsMobile';
 import OnboardingAvatar from '../components/OnboardingAvatar';
@@ -411,15 +411,19 @@ const Onboarding: React.FC<Props> = ({ onComplete, onBack }) => {
     done: { title: '', sub: '' },
   };
 
-  const finish = (data: { crops: string[]; stage: string; soil: string }) => {
-    saveFarmProfile({
+  const finish = async (data: { crops: string[]; stage: string; soil: string }) => {
+    const profile = {
       farmName,
       crop: data.crops[0] ?? '',   // primary crop keeps single-crop consumers working
       crops: data.crops,
       growthStage: data.stage,
       soilType: data.soil,
       productId,
-    });
+    };
+    saveFarmProfile(profile);
+    // Share it against the Product ID before entering, so the dashboard's cloud
+    // hydration reads back exactly what was just chosen rather than a stale copy.
+    await upsertCloudProfile(profile);
     onComplete();
   };
 

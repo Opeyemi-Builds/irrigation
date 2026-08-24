@@ -10,7 +10,8 @@ import Login from './pages/Login';
 import Onboarding from './pages/Onboarding';
 import { LiveDataProvider } from './hooks/useLiveData';
 import { useIsMobile } from './hooks/useIsMobile';
-import { supabase, signOut, hasAppSession } from './lib/auth';
+import { supabase, signOut, hasAppSession, getSessionEmail, DEMO_EMAIL } from './lib/auth';
+import { getFarmProfile, hydrateFarmProfileFromCloud } from './lib/farm';
 
 type AppView = 'landing' | 'login' | 'onboarding' | 'app';
 
@@ -30,6 +31,23 @@ const App: React.FC = () => {
     });
     return () => { mounted = false; };
   }, []);
+
+  // Farm profile hydration. On entering the app, pull the cloud copy for this
+  // farm's Product ID (the demo login maps to 0001) into localStorage, so the
+  // saved setup appears even on a fresh device. Users who already have a local
+  // copy render immediately while the sync refreshes in the background.
+  const [profileReady, setProfileReady] = useState<boolean>(() => getFarmProfile() !== null);
+
+  useEffect(() => {
+    if (view !== 'app') return;
+    const email = (getSessionEmail() ?? '').toLowerCase();
+    const productId = email === DEMO_EMAIL ? '0001' : getFarmProfile()?.productId ?? null;
+    let cancelled = false;
+    hydrateFarmProfileFromCloud(productId).finally(() => {
+      if (!cancelled) setProfileReady(true);
+    });
+    return () => { cancelled = true; };
+  }, [view]);
 
   const handleLogout = async () => {
     await signOut();
@@ -73,6 +91,14 @@ const App: React.FC = () => {
         onComplete={() => setView('app')}
         onBack={() => setView('landing')}
       />
+    );
+  }
+
+  if (!profileReady) {
+    return (
+      <div style={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--bg-base)' }}>
+        <div style={{ width: '26px', height: '26px', border: '2px solid var(--border)', borderTopColor: 'var(--accent-primary)', borderRadius: '50%', animation: 'spin 0.7s linear infinite' }} />
+      </div>
     );
   }
 

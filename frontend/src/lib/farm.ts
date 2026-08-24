@@ -5,6 +5,7 @@
 // is what makes the AI advisor's guidance specific to their crop.
 
 import { IrrigationZone } from '../types';
+import { supabase } from './auth';
 
 export interface FarmProfile {
   farmName: string;
@@ -41,6 +42,84 @@ export function saveFarmProfile(profile: FarmProfile): void {
   } catch {
     /* storage unavailable — the app still works, advice is just generic */
   }
+}
+
+// ── Cloud sync (Supabase, keyed by Product ID) ───────────────────────────────
+// The profile is stored against its Product ID, so any login using that ID — on
+// any device — loads the same farm. localStorage is the instant, offline cache;
+// Supabase is the shared source of truth. Writes use the public (anon) key, so a
+// missing table or dropped network quietly degrades to local-only.
+const CLOUD_TABLE = 'farm_profiles';
+
+interface ProfileRow {
+  product_id: string;
+  farm_name: string | null;
+  crop: string | null;
+  crops: string[] | null;
+  growth_stage: string | null;
+  soil_type: string | null;
+}
+
+function rowToProfile(row: ProfileRow): FarmProfile {
+  const crops = Array.isArray(row.crops) ? row.crops : [];
+  return {
+    farmName: row.farm_name ?? '',
+    crop: row.crop ?? crops[0] ?? '',
+    crops: crops.length ? crops : row.crop ? [row.crop] : [],
+    growthStage: row.growth_stage ?? '',
+    soilType: row.soil_type ?? '',
+    productId: row.product_id,
+  };
+}
+
+function profileToRow(p: FarmProfile): ProfileRow {
+  return {
+    product_id: p.productId ?? '',
+    farm_name: p.farmName ?? '',
+    crop: p.crop ?? '',
+    crops: p.crops ?? [],
+    growth_stage: p.growthStage ?? '',
+    soil_type: p.soilType ?? '',
+  };
+}
+
+// Read the cloud copy for a Product ID. null if it's absent, unreachable, or the
+// table hasn't been created yet.
+export async function fetchCloudProfile(productId: string): Promise<FarmProfile | null> {
+  try {
+    const { data, error } = await supabase
+      .from(CLOUD_TABLE)
+      .select('*')
+      .eq('product_id', productId)
+      .maybeSingle();
+    if (error || !data) return null;
+    return rowToProfile(data as ProfileRow);
+  } catch {
+    return null;
+  }
+}
+
+// Save (insert or update) the profile against its Product ID. Never throws — the
+// local copy is already saved, so a failed sync just means "not shared yet".
+export async function upsertCloudProfile(profile: FarmProfile): Promise<void> {
+  if (!profile.productId) return;
+  try {
+    await supabase.from(CLOUD_TABLE).upsert(profileToRow(profile), { onConflict: 'product_id' });
+  } catch {
+    /* offline or table missing — localStorage still holds the profile */
+  }
+}
+
+// Pull the cloud profile for a Product ID into localStorage so pages that read
+// getFarmProfile() pick it up. Falls back to whatever is already local.
+export async function hydrateFarmProfileFromCloud(productId: string | null): Promise<FarmProfile | null> {
+  if (!productId) return getFarmProfile();
+  const cloud = await fetchCloudProfile(productId);
+  if (cloud) {
+    saveFarmProfile(cloud);
+    return cloud;
+  }
+  return getFarmProfile();
 }
 
 // ── Crop catalogue (used by onboarding + advisor) ────────────────────────────

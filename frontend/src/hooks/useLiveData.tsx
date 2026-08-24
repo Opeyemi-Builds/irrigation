@@ -106,6 +106,47 @@ export function LiveDataProvider({ children }: { children: ReactNode }) {
     return () => clearInterval(id);
   }, [poll]);
 
+  // One-time: seed the chart with saved history from the backend, so trends
+  // aren't empty on a fresh load. Live polling then keeps appending on top.
+  useEffect(() => {
+    if (!API_BASE) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await fetch(`${API_BASE}/api/v1/sensors/history?hours=24`, {
+          signal: AbortSignal.timeout(6000),
+        });
+        if (!res.ok) return;
+        const json = await res.json();
+        const readings = Array.isArray(json?.readings) ? json.readings : [];
+        if (cancelled || readings.length === 0) return;
+
+        const points: HistoryPoint[] = readings
+          .map((r: any) => ({
+            timestamp: r.received_at,
+            temperature: Number.isFinite(r.temperature) ? r.temperature : null,
+            humidity: Number.isFinite(r.humidity) ? r.humidity : null,
+            soilMoisture: Number.isFinite(r.soil_moisture) ? r.soil_moisture : null,
+          }))
+          .slice(-MAX_HISTORY);
+
+        setHistory(prev => {
+          // Keep any live points already collected; prepend the saved ones we
+          // don't already have, then cap to the buffer size.
+          const seen = new Set(prev.map(p => p.timestamp));
+          const merged = [...points.filter(p => !seen.has(p.timestamp)), ...prev];
+          return merged.length > MAX_HISTORY ? merged.slice(merged.length - MAX_HISTORY) : merged;
+        });
+        if (!lastReceivedAt.current && points.length) {
+          lastReceivedAt.current = points[points.length - 1].timestamp;
+        }
+      } catch {
+        /* saved history is a bonus — live polling works fine without it */
+      }
+    })();
+    return () => { cancelled = true; };
+  }, []);
+
   const value: LiveData = {
     temperature: liveData?.temperature ?? null,
     humidity: liveData?.humidity ?? null,

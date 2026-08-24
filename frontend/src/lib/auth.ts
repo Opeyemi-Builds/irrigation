@@ -44,6 +44,19 @@ export function hasAppSession(): boolean {
   }
 }
 
+// The email of the current local session (used to route the demo login to its
+// farm). null if there's no session or storage is unavailable.
+export function getSessionEmail(): string | null {
+  try {
+    const raw = localStorage.getItem(SESSION_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    return typeof parsed?.email === 'string' ? parsed.email : null;
+  } catch {
+    return null;
+  }
+}
+
 export function clearAppSession(): void {
   try {
     localStorage.removeItem(SESSION_KEY);
