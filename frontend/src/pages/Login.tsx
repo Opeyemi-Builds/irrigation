@@ -11,15 +11,12 @@ const Login: React.FC<Props> = ({ onLogin, onBack, onSignUp }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  const handleSubmit = async () => {
-    if (!email || !password) { setError('Please fill in all fields.'); return; }
+  const handleSubmit = () => {
+    if (!email.trim() || !password) { setError('Please fill in all fields.'); return; }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) { setError('Enter a valid email address.'); return; }
     setError('');
-    setLoading(true);
-    await new Promise(r => setTimeout(r, 1200));
-    setLoading(false);
     onLogin();
   };
 
@@ -130,25 +127,24 @@ const Login: React.FC<Props> = ({ onLogin, onBack, onSignUp }) => {
           </div>
 
           {error && (
-            <div style={{ background: 'rgba(248,113,113,0.08)', border: '1px solid rgba(248,113,113,0.2)', borderRadius: 'var(--radius-sm)', padding: '10px 12px', fontSize: '12px', color: '#f87171' }}>
+            <div style={{ background: 'var(--red-muted)', border: '1px solid var(--red)', borderRadius: 'var(--radius-sm)', padding: '10px 12px', fontSize: '12px', color: 'var(--red)' }}>
               {error}
             </div>
           )}
 
           <button
             onClick={handleSubmit}
-            disabled={loading}
             style={{
               display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
-              background: loading ? 'var(--bg-elevated)' : 'var(--accent-primary)',
+              background: 'var(--accent-primary)',
               border: 'none', borderRadius: 'var(--radius-sm)',
               padding: '12px', fontSize: '14px', fontWeight: 700,
-              color: loading ? 'var(--text-muted)' : 'var(--text-on-accent)',
-              cursor: loading ? 'not-allowed' : 'pointer',
+              color: 'var(--text-on-accent)',
+              cursor: 'pointer',
               transition: 'all 0.15s', marginTop: '4px',
             }}
           >
-            {loading ? 'Signing in...' : <><span>Sign In</span><ArrowRight size={14} /></>}
+            <span>Sign In</span><ArrowRight size={14} />
           </button>
         </div>
 

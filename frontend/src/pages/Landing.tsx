@@ -1,5 +1,5 @@
 import React from 'react';
-import { Droplets, Thermometer, Leaf, CloudRain, Bot, BarChart2, ArrowRight, Zap, Shield, Wifi } from 'lucide-react';
+import { Droplets, Thermometer, Bot, BarChart2, Waves, Gauge, ArrowRight, Wifi } from 'lucide-react';
 
 interface Props {
   onGetStarted: () => void;
@@ -11,45 +11,45 @@ const features = [
     icon: <Thermometer size={20} />,
     color: '#ff7c5e',
     title: 'Live Sensor Monitoring',
-    desc: 'Real-time temperature, humidity, and soil moisture data streamed directly from your field sensors.',
+    desc: 'Real-time temperature, humidity, and soil-moisture readings streamed straight from your field sensors.',
   },
   {
     icon: <Bot size={20} />,
     color: '#5dea8a',
     title: 'AI Farm Advisor',
-    desc: 'Crop-aware AI that gives you specific, actionable recommendations based on your field conditions and growth stage.',
+    desc: 'Crop-aware guidance that reads your live sensors and farm profile to tell you what to do next — no guesswork.',
   },
   {
-    icon: <CloudRain size={20} />,
+    icon: <Droplets size={20} />,
     color: '#5bbfef',
-    title: 'Weather-Smart Irrigation',
-    desc: 'Automatically holds irrigation when rain is forecast — saving water and protecting your crops.',
+    title: 'Automatic Watering',
+    desc: 'The pump runs itself from live soil moisture — watering when the ground dries out and stopping once it recovers.',
   },
   {
     icon: <BarChart2 size={20} />,
     color: '#f5a623',
-    title: 'Trend Analytics',
-    desc: '24-hour sensor history with visual charts so you can spot patterns before they become problems.',
+    title: 'Trend Charts',
+    desc: 'Live trend charts for every sensor, so you can spot patterns and act before they become problems.',
   },
   {
-    icon: <Zap size={20} />,
+    icon: <Waves size={20} />,
     color: '#c084fc',
-    title: 'Zone Automation',
-    desc: 'Set moisture thresholds per zone and let the system irrigate automatically — day or night.',
+    title: 'Reservoir Tracking',
+    desc: 'Watch your water level and pump state in real time, with a live reservoir gauge, so you are never caught with an empty tank.',
   },
   {
-    icon: <Shield size={20} />,
+    icon: <Gauge size={20} />,
     color: '#fb7185',
-    title: 'Alert System',
-    desc: 'Instant alerts when sensor readings go critical so you can act before crops are affected.',
+    title: 'Status at a Glance',
+    desc: 'Every reading is scored against healthy ranges, so warning and critical conditions stand out the moment they appear.',
   },
 ];
 
 const stats = [
-  { value: '40%', label: 'Less water used' },
-  { value: '<2s', label: 'Sensor update rate' },
-  { value: '24/7', label: 'Autonomous monitoring' },
-  { value: '4+', label: 'Crop profiles supported' },
+  { value: '8', label: 'Crop profiles' },
+  { value: 'Live', label: 'Sensor readings' },
+  { value: '24/7', label: 'Automatic watering' },
+  { value: 'AI', label: 'Built-in advisor' },
 ];
 
 const Landing: React.FC<Props> = ({ onGetStarted, onLogin }) => {
@@ -150,7 +150,7 @@ const Landing: React.FC<Props> = ({ onGetStarted, onLogin }) => {
           margin: '0 auto 40px',
           animationDelay: '120ms',
         }}>
-          AgroSense connects directly to your field sensors and uses AI to tell you exactly when, where, and how much to irrigate — so you never over- or under-water again.
+          AgroSense connects directly to your field sensors and uses AI to tell you exactly when and how much to water — so you never over- or under-water again.
         </p>
 
         <div className="fade-up" style={{ display: 'flex', gap: '12px', justifyContent: 'center', animationDelay: '180ms' }}>
@@ -245,7 +245,7 @@ const Landing: React.FC<Props> = ({ onGetStarted, onLogin }) => {
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px', position: 'relative' }}>
           {[
             { step: '01', title: 'Create Account', desc: 'Sign up with your name, email, and a secure password.' },
-            { step: '02', title: 'Verify Device', desc: 'Enter your AgroSense device Product ID to link your hardware.' },
+            { step: '02', title: 'Connect Device', desc: 'Enter your AgroSense device Product ID to link your hardware.' },
             { step: '03', title: 'Set Crop Profile', desc: 'Tell us your crop type and current growth stage for tailored advice.' },
             { step: '04', title: 'Start Monitoring', desc: 'Live dashboard activates instantly. Your AI advisor is ready.' },
           ].map((s, i) => (
@@ -293,7 +293,7 @@ const Landing: React.FC<Props> = ({ onGetStarted, onLogin }) => {
             Ready to grow smarter?
           </h2>
           <p style={{ fontSize: '14px', color: 'var(--text-secondary)', marginBottom: '32px' }}>
-            Set up your farm in under 5 minutes. Your device is already waiting.
+            Set up your farm in minutes and connect your AgroSense device.
           </p>
           <button onClick={onGetStarted} style={{
             display: 'inline-flex', alignItems: 'center', gap: '8px',
@@ -320,7 +320,7 @@ const Landing: React.FC<Props> = ({ onGetStarted, onLogin }) => {
           <span style={{ fontFamily: 'var(--font-display)', fontSize: '13px', fontWeight: 700, color: 'var(--text-secondary)' }}>AgroSense</span>
         </div>
         <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
-          Smart Irrigation System · Final Year Project
+          © 2026 AgroSense · Smart Irrigation System
         </div>
       </footer>
     </div>
