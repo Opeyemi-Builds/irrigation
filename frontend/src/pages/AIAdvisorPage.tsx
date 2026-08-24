@@ -4,6 +4,7 @@ import { AIMessage } from '../types';
 import { useLiveData } from '../hooks/useLiveData';
 import { getFarmProfile, describeProfile, buildZones } from '../lib/farm';
 import { getAdvisorReply, ADVISOR_SUGGESTIONS, AdvisorContext } from '../lib/advisor';
+import { useIsMobile } from '../hooks/useIsMobile';
 
 const zoneStatusColor: Record<string, { bg: string; color: string }> = {
   active:    { bg: 'var(--accent-muted)', color: 'var(--accent-primary)' },
@@ -48,6 +49,7 @@ const renderMarkdown = (text: string) => {
 
 const AIAdvisorPage: React.FC = () => {
   const live = useLiveData();
+  const isMobile = useIsMobile();
   const profile = getFarmProfile();
   const zones = buildZones({ soilMoisture: live.soilMoisture, pumpStatus: live.pumpStatus, hasData: live.hasData }, profile);
 
@@ -98,12 +100,12 @@ const AIAdvisorPage: React.FC = () => {
   ];
 
   return (
-    <div style={{ display: 'flex', height: '100vh', overflow: 'hidden' }}>
+    <div style={{ display: 'flex', height: isMobile ? 'calc(100vh - 56px - env(safe-area-inset-top) - env(safe-area-inset-bottom))' : '100vh', overflow: 'hidden' }}>
       {/* Left context panel */}
       <div style={{
         width: '260px', flexShrink: 0,
         background: 'var(--bg-surface)', borderRight: '1px solid var(--border)',
-        display: 'flex', flexDirection: 'column', padding: '24px 16px', overflowY: 'auto',
+        display: isMobile ? 'none' : 'flex', flexDirection: 'column', padding: '24px 16px', overflowY: 'auto',
       }}>
         <div style={{ fontFamily: 'var(--font-display)', fontSize: '12px', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.6px', marginBottom: '16px' }}>
           Live Context
@@ -194,7 +196,7 @@ const AIAdvisorPage: React.FC = () => {
       {/* Main chat */}
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
         {/* Chat header */}
-        <div style={{ padding: '20px 28px', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', gap: '12px', background: 'var(--bg-surface)' }}>
+        <div style={{ padding: isMobile ? '14px 16px' : '20px 28px', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', gap: '12px', background: 'var(--bg-surface)' }}>
           <div style={{ width: '38px', height: '38px', background: 'var(--accent-muted)', border: '1px solid var(--accent-glow)', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <Sparkles size={16} color="var(--accent-primary)" />
           </div>
@@ -214,7 +216,7 @@ const AIAdvisorPage: React.FC = () => {
         </div>
 
         {/* Messages */}
-        <div style={{ flex: 1, overflowY: 'auto', padding: '24px 28px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+        <div style={{ flex: 1, overflowY: 'auto', padding: isMobile ? '16px' : '24px 28px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
           {messages.map(msg => (
             <div key={msg.id} style={{ display: 'flex', gap: '12px', flexDirection: msg.role === 'user' ? 'row-reverse' : 'row', alignItems: 'flex-start' }}>
               <div style={{
@@ -227,7 +229,7 @@ const AIAdvisorPage: React.FC = () => {
                 {msg.role === 'assistant' ? <Bot size={14} /> : <User size={14} />}
               </div>
               <div style={{
-                maxWidth: '72%',
+                maxWidth: isMobile ? '85%' : '72%',
                 background: msg.role === 'user' ? 'var(--accent-muted)' : 'var(--bg-card)',
                 border: `1px solid ${msg.role === 'user' ? 'var(--accent-glow)' : 'var(--border)'}`,
                 borderRadius: msg.role === 'user' ? '14px 4px 14px 14px' : '4px 14px 14px 14px',
@@ -253,7 +255,20 @@ const AIAdvisorPage: React.FC = () => {
         </div>
 
         {/* Input */}
-        <div style={{ padding: '16px 28px', borderTop: '1px solid var(--border)', background: 'var(--bg-surface)' }}>
+        <div style={{ padding: isMobile ? '12px 16px' : '16px 28px', borderTop: '1px solid var(--border)', background: 'var(--bg-surface)' }}>
+          {isMobile && (
+            <div style={{ display: 'flex', gap: '8px', overflowX: 'auto', paddingBottom: '10px', WebkitOverflowScrolling: 'touch' }}>
+              {ADVISOR_SUGGESTIONS.map(p => (
+                <button key={p} onClick={() => send(p)} style={{
+                  flexShrink: 0, background: 'var(--bg-card)', border: '1px solid var(--border-subtle)',
+                  borderRadius: '20px', padding: '7px 14px', fontSize: '12px', color: 'var(--text-secondary)',
+                  cursor: 'pointer', whiteSpace: 'nowrap',
+                }}>
+                  {p}
+                </button>
+              ))}
+            </div>
+          )}
           <div style={{ display: 'flex', gap: '10px', alignItems: 'flex-end' }}>
             <textarea
               value={input}

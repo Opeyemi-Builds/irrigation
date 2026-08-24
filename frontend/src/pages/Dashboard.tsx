@@ -8,7 +8,8 @@ import AIAdvisor from '../components/AIAdvisor';
 import Reservoir3D from '../components/Reservoir3D';
 import DeviceStatusBar from '../components/DeviceStatusBar';
 import { useLiveData } from '../hooks/useLiveData';
-import { getFarmProfile, buildZones, getCropInfo } from '../lib/farm';
+import { getFarmProfile, buildZones, cropsLabel } from '../lib/farm';
+import { useIsMobile } from '../hooks/useIsMobile';
 import { format } from 'date-fns';
 import { SensorData, SensorReading } from '../types';
 
@@ -34,8 +35,9 @@ function toSensorData(current: number | null, unit: string, history: SensorReadi
 
 const Dashboard: React.FC = () => {
   const live = useLiveData();
+  const isMobile = useIsMobile();
   const profile = getFarmProfile();
-  const cropLabel = getCropInfo(profile?.crop)?.label;
+  const cropsText = profile?.crops?.length ? cropsLabel(profile) : '';
 
   const toReadings = (key: 'temperature' | 'humidity' | 'soilMoisture'): SensorReading[] =>
     live.history
@@ -54,7 +56,7 @@ const Dashboard: React.FC = () => {
   const reservoirStatus = live.pumpStatus ? 'draining' : 'idle';
 
   return (
-    <div style={{ padding: '28px 32px', overflowY: 'auto', height: '100vh' }}>
+    <div style={{ padding: isMobile ? '18px 16px 32px' : '28px 32px', overflowY: 'auto', height: isMobile ? 'auto' : '100vh', minHeight: isMobile ? '100%' : undefined }}>
 
       {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '16px', gap: '16px', flexWrap: 'wrap' }}>
@@ -72,7 +74,7 @@ const Dashboard: React.FC = () => {
           {profile && (
             <div style={{ background: 'var(--accent-muted)', border: '1px solid var(--accent-glow)', borderRadius: 'var(--radius-sm)', padding: '6px 14px', fontSize: '12px', color: 'var(--accent-primary)', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '6px' }}>
               <Leaf size={13} />
-              {profile.farmName?.trim() || 'My Farm'}{cropLabel ? ` · ${cropLabel}` : ''}
+              {profile.farmName?.trim() || 'My Farm'}{cropsText ? ` · ${cropsText}` : ''}
             </div>
           )}
           <button
@@ -96,14 +98,14 @@ const Dashboard: React.FC = () => {
       />
 
       {/* Sensor cards */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px', marginBottom: '20px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(3, 1fr)', gap: '16px', marginBottom: '20px' }}>
         <SensorCard title="Temperature"   icon={<Thermometer size={16} strokeWidth={2} />} data={tempData} color="#ff7c5e" delay={0} />
         <SensorCard title="Humidity"      icon={<Droplets size={16} strokeWidth={2} />}   data={humData}  color="#5bbfef" delay={80} />
         <SensorCard title="Soil Moisture" icon={<Leaf size={16} strokeWidth={2} />}       data={soilData} color="#5dea8a" delay={160} />
       </div>
 
       {/* Reservoir + AI */}
-      <div style={{ display: 'grid', gridTemplateColumns: '340px 1fr', gap: '16px', marginBottom: '20px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '340px 1fr', gap: '16px', marginBottom: '20px' }}>
         <Reservoir3D level={live.reservoirPct} status={reservoirStatus} />
         <AIAdvisor />
       </div>
@@ -114,7 +116,7 @@ const Dashboard: React.FC = () => {
       </div>
 
       {/* Weather + Zones */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '28px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: '16px', marginBottom: '28px' }}>
         <WeatherStrip forecast={[]} />
         <IrrigationZones zones={zones} />
       </div>

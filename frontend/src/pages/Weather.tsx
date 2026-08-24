@@ -2,6 +2,7 @@ import React from 'react';
 import { CloudOff, Thermometer, Droplets, Leaf, Waves, Info } from 'lucide-react';
 import { useLiveData } from '../hooks/useLiveData';
 import { getFarmProfile, getCropInfo } from '../lib/farm';
+import { useIsMobile } from '../hooks/useIsMobile';
 import EmptyState from '../components/EmptyState';
 
 const ConditionCard: React.FC<{ icon: React.ReactNode; label: string; value: string; color: string }> = ({ icon, label, value, color }) => (
@@ -20,11 +21,12 @@ const ConditionCard: React.FC<{ icon: React.ReactNode; label: string; value: str
 
 const Weather: React.FC = () => {
   const live = useLiveData();
+  const isMobile = useIsMobile();
   const profile = getFarmProfile();
   const crop = getCropInfo(profile?.crop);
 
   return (
-    <div style={{ padding: '28px 32px', overflowY: 'auto', height: '100vh' }}>
+    <div style={{ padding: isMobile ? '18px 16px 32px' : '28px 32px', overflowY: 'auto', height: isMobile ? 'auto' : '100vh', minHeight: isMobile ? '100%' : undefined }}>
       {/* Header */}
       <div style={{ marginBottom: '24px' }}>
         <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '26px', fontWeight: 800, color: 'var(--text-primary)', letterSpacing: '-0.5px', marginBottom: '4px' }}>

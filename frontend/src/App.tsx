@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Sidebar from './components/Sidebar';
 import Dashboard from './pages/Dashboard';
 import Sensors from './pages/Sensors';
@@ -9,12 +9,31 @@ import Landing from './pages/Landing';
 import Login from './pages/Login';
 import Onboarding from './pages/Onboarding';
 import { LiveDataProvider } from './hooks/useLiveData';
+import { useIsMobile } from './hooks/useIsMobile';
+import { supabase, signOut } from './lib/auth';
 
 type AppView = 'landing' | 'login' | 'onboarding' | 'app';
 
 const App: React.FC = () => {
+  const isMobile = useIsMobile();
   const [view, setView] = useState<AppView>('landing');
   const [activePage, setActivePage] = useState('dashboard');
+
+  // Restore an existing Supabase session so returning, signed-in users land
+  // straight in the app. (The demo login has no session, so it never auto-enters.)
+  useEffect(() => {
+    let mounted = true;
+    supabase.auth.getSession().then(({ data }) => {
+      if (mounted && data.session) setView('app');
+    });
+    return () => { mounted = false; };
+  }, []);
+
+  const handleLogout = async () => {
+    await signOut();
+    setActivePage('dashboard');
+    setView('landing');
+  };
 
   const renderPage = () => {
     switch (activePage) {
@@ -58,8 +77,8 @@ const App: React.FC = () => {
   return (
     <LiveDataProvider>
       <div style={{ display: 'flex', height: '100vh', overflow: 'hidden' }}>
-        <Sidebar activePage={activePage} onNavigate={setActivePage} />
-        <main style={{ flex: 1, overflow: 'auto', background: 'var(--bg-base)' }}>
+        <Sidebar activePage={activePage} onNavigate={setActivePage} onLogout={handleLogout} />
+        <main style={{ flex: 1, overflow: 'auto', background: 'var(--bg-base)', paddingTop: isMobile ? 'calc(56px + env(safe-area-inset-top))' : 0, paddingBottom: isMobile ? 'env(safe-area-inset-bottom)' : 0 }}>
           {renderPage()}
         </main>
       </div>

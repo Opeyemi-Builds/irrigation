@@ -27,7 +27,8 @@ export type AuthResult = { ok: true } | { ok: false; error: string };
 // Turn raw Supabase error text into clean, human wording.
 const friendly = (message: string): string => {
   const m = message.toLowerCase();
-  if (m.includes('invalid login')) return 'That email or password is incorrect.';
+  if (m.includes('invalid login')) return 'That email or password is incorrect. Only accounts that have signed up can log in.';
+  if (m.includes('not confirmed')) return "Your email isn't confirmed yet. Check your inbox, or use the demo login below to explore now.";
   if (m.includes('already registered') || m.includes('already exists') || m.includes('already been registered'))
     return 'An account with this email already exists — try signing in instead.';
   if (m.includes('at least') && m.includes('password')) return 'Please use a password with at least 6 characters.';
@@ -39,15 +40,12 @@ const friendly = (message: string): string => {
 
 // ── Sign in ──────────────────────────────────────────────────────────────────
 export async function signIn(email: string, password: string): Promise<AuthResult> {
-  // Demo account: instant entry, no network, no verification.
+  // Master/demo account: instant entry, no network, no verification.
   if (isDemoCredentials(email, password)) return { ok: true };
 
+  // Everyone else must be a real, signed-up account.
   const { error } = await supabase.auth.signInWithPassword({ email: email.trim(), password });
-  if (error) {
-    // We intentionally do not gate entry on email confirmation — let the user in.
-    if (error.message.toLowerCase().includes('not confirmed')) return { ok: true };
-    return { ok: false, error: friendly(error.message) };
-  }
+  if (error) return { ok: false, error: friendly(error.message) };
   return { ok: true };
 }
 

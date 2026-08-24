@@ -2,6 +2,7 @@ import React from 'react';
 import { Power, Droplets, Waves, Gauge, Info, CheckCircle, Minus as MinusIcon } from 'lucide-react';
 import { useLiveData } from '../hooks/useLiveData';
 import { getFarmProfile, buildZones, getCropInfo } from '../lib/farm';
+import { useIsMobile } from '../hooks/useIsMobile';
 import { RELAY_ON_THRESHOLD, RELAY_OFF_THRESHOLD } from '../data/config';
 import { IrrigationZone } from '../types';
 
@@ -75,6 +76,7 @@ const StatCard: React.FC<{ label: string; value: string; color: string; icon: Re
 
 const Irrigation: React.FC = () => {
   const live = useLiveData();
+  const isMobile = useIsMobile();
   const profile = getFarmProfile();
   const crop = getCropInfo(profile?.crop);
   const zones = buildZones({ soilMoisture: live.soilMoisture, pumpStatus: live.pumpStatus, hasData: live.hasData }, profile);
@@ -91,7 +93,7 @@ const Irrigation: React.FC = () => {
   }
 
   return (
-    <div style={{ padding: '28px 32px', overflowY: 'auto', height: '100vh' }}>
+    <div style={{ padding: isMobile ? '18px 16px 32px' : '28px 32px', overflowY: 'auto', height: isMobile ? 'auto' : '100vh', minHeight: isMobile ? '100%' : undefined }}>
       {/* Header */}
       <div style={{ marginBottom: '24px' }}>
         <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '26px', fontWeight: 800, color: 'var(--text-primary)', letterSpacing: '-0.5px', marginBottom: '4px' }}>
@@ -103,7 +105,7 @@ const Irrigation: React.FC = () => {
       </div>
 
       {/* Live stats */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '12px', marginBottom: '20px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : 'repeat(4, 1fr)', gap: '12px', marginBottom: '20px' }}>
         <StatCard label="Pump" value={pumpOn == null ? '—' : pumpOn ? 'Running' : 'Off'} color={pumpOn ? 'var(--accent-primary)' : 'var(--text-secondary)'} icon={<Power size={14} />} />
         <StatCard label="Soil Moisture" value={soil != null ? `${soil}%` : '—'} color="var(--accent-primary)" icon={<Droplets size={14} />} />
         <StatCard label="Reservoir" value={live.reservoirPct != null ? `${live.reservoirPct}%` : '—'} color="var(--blue)" icon={<Waves size={14} />} />
@@ -144,7 +146,7 @@ const Irrigation: React.FC = () => {
       <div style={{ marginBottom: '12px' }}>
         <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '15px', fontWeight: 700, color: 'var(--text-primary)' }}>Zones</h3>
       </div>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '16px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(2, 1fr)', gap: '16px' }}>
         {zones.map(zone => <ZoneCard key={zone.id} zone={zone} />)}
       </div>
     </div>

@@ -8,7 +8,8 @@ import { IrrigationZone } from '../types';
 
 export interface FarmProfile {
   farmName: string;
-  crop: string;        // CROP value, e.g. 'maize'
+  crop: string;        // primary CROP value (first selected), e.g. 'maize'
+  crops: string[];     // all crops the farmer grows — catalogue values or custom names
   growthStage: string; // GROWTH_STAGE value, e.g. 'vegetative'
   soilType: string;    // SOIL_TYPE value, e.g. 'loamy'
   productId?: string;
@@ -21,7 +22,13 @@ export function getFarmProfile(): FarmProfile | null {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return null;
     const parsed = JSON.parse(raw);
-    if (parsed && typeof parsed.crop === 'string') return parsed as FarmProfile;
+    if (parsed && typeof parsed.crop === 'string') {
+      // Normalise older single-crop profiles into the crops[] shape.
+      if (!Array.isArray(parsed.crops) || parsed.crops.length === 0) {
+        parsed.crops = parsed.crop ? [parsed.crop] : [];
+      }
+      return parsed as FarmProfile;
+    }
     return null;
   } catch {
     return null;
@@ -99,10 +106,26 @@ export function getSoilType(value?: string): SoilTypeInfo | undefined {
   return SOIL_TYPES.find(s => s.value === value);
 }
 
+// Label for any crop entry — a catalogue label for known crops, or the raw
+// (custom) name the farmer typed in.
+export function cropLabel(value: string): string {
+  return getCropInfo(value)?.label ?? value;
+}
+
+// Natural-language list of every crop on the farm, e.g. "Maize, Tomato and Pepper".
+export function cropsLabel(profile: FarmProfile | null): string {
+  const list = profile?.crops?.length ? profile.crops : profile?.crop ? [profile.crop] : [];
+  const labels = list.map(cropLabel);
+  if (labels.length === 0) return 'your crops';
+  if (labels.length === 1) return labels[0];
+  if (labels.length === 2) return `${labels[0]} and ${labels[1]}`;
+  return `${labels.slice(0, -1).join(', ')} and ${labels[labels.length - 1]}`;
+}
+
 // Human-readable one-liner describing the configured farm.
 export function describeProfile(profile: FarmProfile | null): string {
   if (!profile) return 'your farm';
-  const crop = getCropInfo(profile.crop)?.label ?? profile.crop;
+  const crop = cropsLabel(profile);
   const stage = getGrowthStage(profile.growthStage)?.label.toLowerCase() ?? profile.growthStage;
   const soil = getSoilType(profile.soilType)?.label.toLowerCase() ?? profile.soilType;
   return `${crop} at the ${stage} stage on ${soil} soil`;
@@ -122,11 +145,15 @@ export function buildZones(live: LiveZoneInput, profile: FarmProfile | null): Ir
   const primaryName = profile?.farmName?.trim()
     ? profile.farmName.trim()
     : 'Field Zone';
-  const cropLabel = getCropInfo(profile?.crop)?.label;
+  const primaryCropLabel = profile?.crops?.length
+    ? cropLabel(profile.crops[0])
+    : profile?.crop
+    ? cropLabel(profile.crop)
+    : undefined;
 
   const primary: IrrigationZone = {
     id: 'z1',
-    name: cropLabel ? `${primaryName} — ${cropLabel}` : primaryName,
+    name: primaryCropLabel ? `${primaryName} — ${primaryCropLabel}` : primaryName,
     status: live.hasData ? (live.pumpStatus ? 'active' : 'idle') : 'idle',
     moisture: live.hasData ? live.soilMoisture : null,
     lastIrrigated: null,

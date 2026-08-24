@@ -1,5 +1,6 @@
 import React from 'react';
 import { Droplets, Thermometer, Bot, BarChart2, Waves, Gauge, ArrowRight, Wifi } from 'lucide-react';
+import { useIsMobile } from '../hooks/useIsMobile';
 
 interface Props {
   onGetStarted: () => void;
@@ -8,37 +9,37 @@ interface Props {
 
 const features = [
   {
-    icon: <Thermometer size={20} />,
+    icon: <Thermometer size={22} />,
     color: '#ff7c5e',
     title: 'Live Sensor Monitoring',
     desc: 'Real-time temperature, humidity, and soil-moisture readings streamed straight from your field sensors.',
   },
   {
-    icon: <Bot size={20} />,
+    icon: <Bot size={22} />,
     color: '#5dea8a',
     title: 'AI Farm Advisor',
     desc: 'Crop-aware guidance that reads your live sensors and farm profile to tell you what to do next — no guesswork.',
   },
   {
-    icon: <Droplets size={20} />,
+    icon: <Droplets size={22} />,
     color: '#5bbfef',
     title: 'Automatic Watering',
     desc: 'The pump runs itself from live soil moisture — watering when the ground dries out and stopping once it recovers.',
   },
   {
-    icon: <BarChart2 size={20} />,
+    icon: <BarChart2 size={22} />,
     color: '#f5a623',
     title: 'Trend Charts',
     desc: 'Live trend charts for every sensor, so you can spot patterns and act before they become problems.',
   },
   {
-    icon: <Waves size={20} />,
+    icon: <Waves size={22} />,
     color: '#c084fc',
     title: 'Reservoir Tracking',
     desc: 'Watch your water level and pump state in real time, with a live reservoir gauge, so you are never caught with an empty tank.',
   },
   {
-    icon: <Gauge size={20} />,
+    icon: <Gauge size={22} />,
     color: '#fb7185',
     title: 'Status at a Glance',
     desc: 'Every reading is scored against healthy ranges, so warning and critical conditions stand out the moment they appear.',
@@ -46,13 +47,21 @@ const features = [
 ];
 
 const stats = [
-  { value: '8', label: 'Crop profiles' },
+  { value: '8+', label: 'Crop profiles' },
   { value: 'Live', label: 'Sensor readings' },
   { value: '24/7', label: 'Automatic watering' },
   { value: 'AI', label: 'Built-in advisor' },
 ];
 
+// High-contrast body copy — noticeably brighter than --text-secondary so the
+// page stays comfortable to read for every visitor, including older eyes.
+const BODY = '#c3d8c7';
+
 const Landing: React.FC<Props> = ({ onGetStarted, onLogin }) => {
+  const isMobile = useIsMobile();
+  const padX = isMobile ? '20px' : '48px';
+  const sectionGap = isMobile ? '56px' : '80px';
+
   return (
     <div style={{ minHeight: '100vh', background: 'var(--bg-base)', overflowY: 'auto' }}>
 
@@ -60,9 +69,10 @@ const Landing: React.FC<Props> = ({ onGetStarted, onLogin }) => {
       <nav style={{
         position: 'sticky', top: 0, zIndex: 100,
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        padding: '16px 48px',
-        background: 'rgba(10,15,13,0.85)',
+        padding: isMobile ? '13px 20px' : '16px 48px',
+        background: 'rgba(10,15,13,0.9)',
         backdropFilter: 'blur(12px)',
+        WebkitBackdropFilter: 'blur(12px)',
         borderBottom: '1px solid var(--border)',
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
@@ -73,39 +83,41 @@ const Landing: React.FC<Props> = ({ onGetStarted, onLogin }) => {
           }}>
             <Droplets size={16} color="var(--text-on-accent)" strokeWidth={2.5} />
           </div>
-          <span style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: '16px', color: 'var(--text-primary)', letterSpacing: '-0.3px' }}>
+          <span style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: '17px', color: 'var(--text-primary)', letterSpacing: '-0.3px' }}>
             AgroSense
           </span>
         </div>
         <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
           <button onClick={onLogin} style={{
             background: 'transparent', border: '1px solid var(--border)',
-            borderRadius: 'var(--radius-sm)', padding: '7px 18px',
-            fontSize: '13px', color: 'var(--text-secondary)', cursor: 'pointer',
+            borderRadius: 'var(--radius-sm)', padding: '8px 18px',
+            fontSize: '14px', fontWeight: 600, color: 'var(--text-primary)', cursor: 'pointer',
             transition: 'all 0.15s',
           }}
           onMouseEnter={e => { (e.currentTarget as HTMLElement).style.borderColor = 'var(--accent-primary)'; (e.currentTarget as HTMLElement).style.color = 'var(--accent-primary)'; }}
-          onMouseLeave={e => { (e.currentTarget as HTMLElement).style.borderColor = 'var(--border)'; (e.currentTarget as HTMLElement).style.color = 'var(--text-secondary)'; }}
+          onMouseLeave={e => { (e.currentTarget as HTMLElement).style.borderColor = 'var(--border)'; (e.currentTarget as HTMLElement).style.color = 'var(--text-primary)'; }}
           >
             Sign In
           </button>
-          <button onClick={onGetStarted} style={{
-            background: 'var(--accent-primary)', border: 'none',
-            borderRadius: 'var(--radius-sm)', padding: '7px 18px',
-            fontSize: '13px', fontWeight: 600, color: 'var(--text-on-accent)',
-            cursor: 'pointer', transition: 'opacity 0.15s',
-          }}
-          onMouseEnter={e => (e.currentTarget as HTMLElement).style.opacity = '0.88'}
-          onMouseLeave={e => (e.currentTarget as HTMLElement).style.opacity = '1'}
-          >
-            Get Started
-          </button>
+          {!isMobile && (
+            <button onClick={onGetStarted} style={{
+              background: 'var(--accent-primary)', border: 'none',
+              borderRadius: 'var(--radius-sm)', padding: '8px 18px',
+              fontSize: '14px', fontWeight: 700, color: 'var(--text-on-accent)',
+              cursor: 'pointer', transition: 'opacity 0.15s',
+            }}
+            onMouseEnter={e => (e.currentTarget as HTMLElement).style.opacity = '0.88'}
+            onMouseLeave={e => (e.currentTarget as HTMLElement).style.opacity = '1'}
+            >
+              Get Started
+            </button>
+          )}
         </div>
       </nav>
 
       {/* Hero */}
       <section style={{
-        padding: '100px 48px 80px',
+        padding: isMobile ? '56px 20px 48px' : '100px 48px 80px',
         textAlign: 'center',
         position: 'relative',
         overflow: 'hidden',
@@ -113,7 +125,7 @@ const Landing: React.FC<Props> = ({ onGetStarted, onLogin }) => {
         {/* Glow orb */}
         <div style={{
           position: 'absolute', top: '20%', left: '50%', transform: 'translateX(-50%)',
-          width: '600px', height: '300px',
+          width: '600px', maxWidth: '95vw', height: '300px',
           background: 'radial-gradient(ellipse, rgba(93,234,138,0.07) 0%, transparent 70%)',
           pointerEvents: 'none',
         }} />
@@ -121,23 +133,23 @@ const Landing: React.FC<Props> = ({ onGetStarted, onLogin }) => {
         <div className="fade-up" style={{
           display: 'inline-flex', alignItems: 'center', gap: '7px',
           background: 'var(--accent-muted)', border: '1px solid rgba(93,234,138,0.2)',
-          borderRadius: '20px', padding: '5px 14px',
-          fontSize: '11px', color: 'var(--accent-primary)', fontWeight: 600,
+          borderRadius: '20px', padding: '6px 15px',
+          fontSize: '12px', color: 'var(--accent-primary)', fontWeight: 700,
           letterSpacing: '0.4px', textTransform: 'uppercase',
           marginBottom: '28px',
         }}>
-          <Wifi size={10} />
+          <Wifi size={11} />
           IoT-Powered Smart Irrigation
         </div>
 
         <h1 className="fade-up" style={{
           fontFamily: 'var(--font-display)',
-          fontSize: '64px', fontWeight: 800,
+          fontSize: isMobile ? '36px' : '64px', fontWeight: 800,
           color: 'var(--text-primary)',
-          letterSpacing: '-2px', lineHeight: 1.05,
-          marginBottom: '24px',
+          letterSpacing: isMobile ? '-1px' : '-2px', lineHeight: 1.08,
+          marginBottom: '22px',
           animationDelay: '60ms',
-          maxWidth: '800px', margin: '0 auto 24px',
+          maxWidth: '800px', margin: '0 auto 22px',
         }}>
           Farm smarter.<br />
           <span style={{ color: 'var(--accent-primary)' }}>Water less.</span><br />
@@ -145,32 +157,32 @@ const Landing: React.FC<Props> = ({ onGetStarted, onLogin }) => {
         </h1>
 
         <p className="fade-up" style={{
-          fontSize: '17px', color: 'var(--text-secondary)',
-          lineHeight: 1.7, maxWidth: '520px',
-          margin: '0 auto 40px',
+          fontSize: isMobile ? '16px' : '19px', color: BODY,
+          lineHeight: 1.7, maxWidth: '560px',
+          margin: '0 auto 36px',
           animationDelay: '120ms',
         }}>
           AgroSense connects directly to your field sensors and uses AI to tell you exactly when and how much to water — so you never over- or under-water again.
         </p>
 
-        <div className="fade-up" style={{ display: 'flex', gap: '12px', justifyContent: 'center', animationDelay: '180ms' }}>
+        <div className="fade-up" style={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', gap: '12px', justifyContent: 'center', animationDelay: '180ms' }}>
           <button onClick={onGetStarted} style={{
-            display: 'flex', alignItems: 'center', gap: '8px',
+            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
             background: 'var(--accent-primary)', border: 'none',
-            borderRadius: 'var(--radius-md)', padding: '12px 28px',
-            fontSize: '14px', fontWeight: 700, color: 'var(--text-on-accent)',
+            borderRadius: 'var(--radius-md)', padding: '14px 28px',
+            fontSize: '15px', fontWeight: 700, color: 'var(--text-on-accent)',
             cursor: 'pointer', transition: 'all 0.15s',
             boxShadow: '0 0 24px var(--accent-glow)',
           }}
           onMouseEnter={e => (e.currentTarget as HTMLElement).style.transform = 'translateY(-1px)'}
           onMouseLeave={e => (e.currentTarget as HTMLElement).style.transform = 'translateY(0)'}
           >
-            Set Up Your Farm <ArrowRight size={15} />
+            Set Up Your Farm <ArrowRight size={16} />
           </button>
           <button onClick={onLogin} style={{
             background: 'var(--bg-card)', border: '1px solid var(--border)',
-            borderRadius: 'var(--radius-md)', padding: '12px 28px',
-            fontSize: '14px', color: 'var(--text-secondary)', cursor: 'pointer',
+            borderRadius: 'var(--radius-md)', padding: '14px 28px',
+            fontSize: '15px', fontWeight: 600, color: 'var(--text-primary)', cursor: 'pointer',
             transition: 'border-color 0.15s',
           }}
           onMouseEnter={e => (e.currentTarget as HTMLElement).style.borderColor = 'var(--accent-primary)'}
@@ -183,33 +195,33 @@ const Landing: React.FC<Props> = ({ onGetStarted, onLogin }) => {
 
       {/* Stats bar */}
       <section style={{
-        margin: '0 48px',
+        margin: `0 ${padX}`,
         background: 'var(--bg-card)', border: '1px solid var(--border)',
-        borderRadius: 'var(--radius-xl)', padding: '28px 48px',
-        display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)',
-        gap: '24px', textAlign: 'center',
-        marginBottom: '80px',
+        borderRadius: 'var(--radius-xl)', padding: isMobile ? '26px 20px' : '28px 48px',
+        display: 'grid', gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : 'repeat(4, 1fr)',
+        gap: isMobile ? '20px 16px' : '24px', textAlign: 'center',
+        marginBottom: sectionGap,
       }}>
         {stats.map(s => (
           <div key={s.label}>
-            <div style={{ fontFamily: 'var(--font-display)', fontSize: '36px', fontWeight: 800, color: 'var(--accent-primary)', letterSpacing: '-1px', marginBottom: '4px' }}>{s.value}</div>
-            <div style={{ fontSize: '12px', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>{s.label}</div>
+            <div style={{ fontFamily: 'var(--font-display)', fontSize: isMobile ? '30px' : '38px', fontWeight: 800, color: 'var(--accent-primary)', letterSpacing: '-1px', marginBottom: '4px' }}>{s.value}</div>
+            <div style={{ fontSize: '13px', color: BODY, textTransform: 'uppercase', letterSpacing: '0.5px', fontWeight: 600 }}>{s.label}</div>
           </div>
         ))}
       </section>
 
       {/* Features */}
-      <section style={{ padding: '0 48px 80px' }}>
-        <div style={{ textAlign: 'center', marginBottom: '48px' }}>
-          <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '36px', fontWeight: 800, color: 'var(--text-primary)', letterSpacing: '-1px', marginBottom: '12px' }}>
+      <section style={{ padding: `0 ${padX} ${sectionGap}` }}>
+        <div style={{ textAlign: 'center', marginBottom: isMobile ? '32px' : '48px' }}>
+          <h2 style={{ fontFamily: 'var(--font-display)', fontSize: isMobile ? '27px' : '38px', fontWeight: 800, color: 'var(--text-primary)', letterSpacing: '-1px', marginBottom: '12px' }}>
             Everything your farm needs
           </h2>
-          <p style={{ fontSize: '14px', color: 'var(--text-muted)', maxWidth: '400px', margin: '0 auto' }}>
+          <p style={{ fontSize: isMobile ? '15px' : '16px', color: BODY, maxWidth: '440px', margin: '0 auto', lineHeight: 1.6 }}>
             One device. One dashboard. Full visibility and control over your field conditions.
           </p>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(3, 1fr)', gap: '16px' }}>
           {features.map((f, i) => (
             <div key={i} style={{
               background: 'var(--bg-card)', border: '1px solid var(--border)',
@@ -221,33 +233,33 @@ const Landing: React.FC<Props> = ({ onGetStarted, onLogin }) => {
             onMouseLeave={e => { (e.currentTarget as HTMLElement).style.borderColor = 'var(--border)'; (e.currentTarget as HTMLElement).style.transform = 'translateY(0)'; }}
             >
               <div style={{
-                width: '42px', height: '42px',
+                width: '44px', height: '44px',
                 background: f.color + '15', border: `1px solid ${f.color}30`,
                 borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center',
                 color: f.color, marginBottom: '16px',
               }}>
                 {f.icon}
               </div>
-              <div style={{ fontFamily: 'var(--font-display)', fontSize: '15px', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '8px' }}>{f.title}</div>
-              <div style={{ fontSize: '13px', color: 'var(--text-secondary)', lineHeight: 1.65 }}>{f.desc}</div>
+              <div style={{ fontFamily: 'var(--font-display)', fontSize: '17px', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '9px' }}>{f.title}</div>
+              <div style={{ fontSize: '15px', color: BODY, lineHeight: 1.7 }}>{f.desc}</div>
             </div>
           ))}
         </div>
       </section>
 
       {/* How it works */}
-      <section style={{ padding: '0 48px 80px' }}>
-        <div style={{ textAlign: 'center', marginBottom: '48px' }}>
-          <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '36px', fontWeight: 800, color: 'var(--text-primary)', letterSpacing: '-1px', marginBottom: '12px' }}>
+      <section style={{ padding: `0 ${padX} ${sectionGap}` }}>
+        <div style={{ textAlign: 'center', marginBottom: isMobile ? '32px' : '48px' }}>
+          <h2 style={{ fontFamily: 'var(--font-display)', fontSize: isMobile ? '27px' : '38px', fontWeight: 800, color: 'var(--text-primary)', letterSpacing: '-1px', marginBottom: '12px' }}>
             Up and running in minutes
           </h2>
         </div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px', position: 'relative' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(4, 1fr)', gap: '16px', position: 'relative' }}>
           {[
-            { step: '01', title: 'Create Account', desc: 'Sign up with your name, email, and a secure password.' },
-            { step: '02', title: 'Connect Device', desc: 'Enter your AgroSense device Product ID to link your hardware.' },
-            { step: '03', title: 'Set Crop Profile', desc: 'Tell us your crop type and current growth stage for tailored advice.' },
-            { step: '04', title: 'Start Monitoring', desc: 'Live dashboard activates instantly. Your AI advisor is ready.' },
+            { title: 'Create Account', desc: 'Sign up with your name, email, and a secure password.' },
+            { title: 'Connect Device', desc: 'Enter your AgroSense device Product ID to link your hardware.' },
+            { title: 'Set Crop Profile', desc: 'Tell us which crops you grow and their growth stage for tailored advice.' },
+            { title: 'Start Monitoring', desc: 'Live dashboard activates instantly. Your AI advisor is ready.' },
           ].map((s, i) => (
             <div key={i} style={{
               background: 'var(--bg-card)', border: '1px solid var(--border)',
@@ -259,67 +271,71 @@ const Landing: React.FC<Props> = ({ onGetStarted, onLogin }) => {
                 color: 'var(--accent-primary)', opacity: 0.15,
                 position: 'absolute', top: '12px', right: '16px',
                 lineHeight: 1, letterSpacing: '-2px',
-              }}>{s.step}</div>
+              }}>{String(i + 1).padStart(2, '0')}</div>
               <div style={{
-                width: '28px', height: '28px',
+                width: '30px', height: '30px',
                 background: 'var(--accent-muted)', border: '1px solid rgba(93,234,138,0.2)',
                 borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                fontFamily: 'var(--font-display)', fontSize: '12px', fontWeight: 700, color: 'var(--accent-primary)',
+                fontFamily: 'var(--font-display)', fontSize: '13px', fontWeight: 700, color: 'var(--accent-primary)',
                 marginBottom: '16px',
               }}>{i + 1}</div>
-              <div style={{ fontFamily: 'var(--font-display)', fontSize: '14px', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '8px' }}>{s.title}</div>
-              <div style={{ fontSize: '12px', color: 'var(--text-secondary)', lineHeight: 1.6 }}>{s.desc}</div>
+              <div style={{ fontFamily: 'var(--font-display)', fontSize: '16px', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '8px' }}>{s.title}</div>
+              <div style={{ fontSize: '14px', color: BODY, lineHeight: 1.65 }}>{s.desc}</div>
             </div>
           ))}
         </div>
       </section>
 
       {/* CTA */}
-      <section style={{ padding: '0 48px 80px' }}>
+      <section style={{ padding: `0 ${padX} ${sectionGap}` }}>
         <div style={{
           background: 'linear-gradient(135deg, #162019 0%, #0f1a12 100%)',
           border: '1px solid rgba(93,234,138,0.15)',
-          borderRadius: 'var(--radius-xl)', padding: '60px',
+          borderRadius: 'var(--radius-xl)', padding: isMobile ? '40px 22px' : '60px',
           textAlign: 'center',
           position: 'relative', overflow: 'hidden',
         }}>
           <div style={{
             position: 'absolute', top: '-50px', left: '50%', transform: 'translateX(-50%)',
-            width: '400px', height: '200px',
+            width: '400px', maxWidth: '90%', height: '200px',
             background: 'radial-gradient(ellipse, rgba(93,234,138,0.1) 0%, transparent 70%)',
             pointerEvents: 'none',
           }} />
-          <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '40px', fontWeight: 800, color: 'var(--text-primary)', letterSpacing: '-1.5px', marginBottom: '16px' }}>
+          <h2 style={{ fontFamily: 'var(--font-display)', fontSize: isMobile ? '27px' : '40px', fontWeight: 800, color: 'var(--text-primary)', letterSpacing: '-1.5px', marginBottom: '16px' }}>
             Ready to grow smarter?
           </h2>
-          <p style={{ fontSize: '14px', color: 'var(--text-secondary)', marginBottom: '32px' }}>
+          <p style={{ fontSize: isMobile ? '15px' : '16px', color: BODY, marginBottom: '30px', lineHeight: 1.6 }}>
             Set up your farm in minutes and connect your AgroSense device.
           </p>
           <button onClick={onGetStarted} style={{
             display: 'inline-flex', alignItems: 'center', gap: '8px',
             background: 'var(--accent-primary)', border: 'none',
-            borderRadius: 'var(--radius-md)', padding: '13px 32px',
-            fontSize: '14px', fontWeight: 700, color: 'var(--text-on-accent)',
+            borderRadius: 'var(--radius-md)', padding: '14px 32px',
+            fontSize: '15px', fontWeight: 700, color: 'var(--text-on-accent)',
             cursor: 'pointer', boxShadow: '0 0 32px var(--accent-glow)',
             transition: 'all 0.15s',
           }}
           onMouseEnter={e => (e.currentTarget as HTMLElement).style.transform = 'translateY(-1px)'}
           onMouseLeave={e => (e.currentTarget as HTMLElement).style.transform = 'translateY(0)'}
           >
-            Get Started Free <ArrowRight size={15} />
+            Get Started <ArrowRight size={16} />
           </button>
         </div>
       </section>
 
       {/* Footer */}
-      <footer style={{ padding: '24px 48px', borderTop: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <footer style={{
+        padding: `22px ${padX}`, borderTop: '1px solid var(--border)',
+        display: 'flex', flexDirection: isMobile ? 'column' : 'row', gap: isMobile ? '12px' : '0',
+        justifyContent: 'space-between', alignItems: 'center', textAlign: 'center',
+      }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
           <div style={{ width: '24px', height: '24px', background: 'var(--accent-primary)', borderRadius: '6px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <Droplets size={12} color="var(--text-on-accent)" strokeWidth={2.5} />
           </div>
-          <span style={{ fontFamily: 'var(--font-display)', fontSize: '13px', fontWeight: 700, color: 'var(--text-secondary)' }}>AgroSense</span>
+          <span style={{ fontFamily: 'var(--font-display)', fontSize: '14px', fontWeight: 700, color: 'var(--text-primary)' }}>AgroSense</span>
         </div>
-        <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
+        <div style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>
           © 2026 AgroSense · Smart Irrigation System
         </div>
       </footer>

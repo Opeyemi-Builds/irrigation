@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Droplets, Eye, EyeOff, ArrowRight, ArrowLeft, Loader2 } from 'lucide-react';
 import { signIn, DEMO_EMAIL, DEMO_PASSWORD } from '../lib/auth';
+import { useIsMobile } from '../hooks/useIsMobile';
 
 interface Props {
   onLogin: () => void;
@@ -9,6 +10,7 @@ interface Props {
 }
 
 const Login: React.FC<Props> = ({ onLogin, onBack, onSignUp }) => {
+  const isMobile = useIsMobile();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -81,7 +83,7 @@ const Login: React.FC<Props> = ({ onLogin, onBack, onSignUp }) => {
       <div className="fade-up" style={{
         width: '100%', maxWidth: '400px',
         background: 'var(--bg-card)', border: '1px solid var(--border)',
-        borderRadius: 'var(--radius-xl)', padding: '40px',
+        borderRadius: 'var(--radius-xl)', padding: isMobile ? '30px 22px' : '40px',
       }}>
         {/* Logo */}
         <div style={{ textAlign: 'center', marginBottom: '32px' }}>

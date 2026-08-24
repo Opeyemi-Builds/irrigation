@@ -4,6 +4,7 @@ import {
 } from 'recharts';
 import { Thermometer, Droplets, Leaf, TrendingUp, TrendingDown, Minus, Activity, LineChart as LineChartIcon } from 'lucide-react';
 import { useLiveData } from '../hooks/useLiveData';
+import { useIsMobile } from '../hooks/useIsMobile';
 import EmptyState from '../components/EmptyState';
 import { format } from 'date-fns';
 
@@ -24,6 +25,7 @@ const StatBox: React.FC<{ label: string; value: string; color?: string }> = ({ l
 
 const Sensors: React.FC = () => {
   const live = useLiveData();
+  const isMobile = useIsMobile();
   const [active, setActive] = useState<SensorKey>('temperature');
   const sensor = SENSORS.find(s => s.key === active)!;
 
@@ -62,7 +64,7 @@ const Sensors: React.FC = () => {
   const hasChart = chartData.length >= 2;
 
   return (
-    <div style={{ padding: '28px 32px', overflowY: 'auto', height: '100vh' }}>
+    <div style={{ padding: isMobile ? '18px 16px 32px' : '28px 32px', overflowY: 'auto', height: isMobile ? 'auto' : '100vh', minHeight: isMobile ? '100%' : undefined }}>
       {/* Header */}
       <div style={{ marginBottom: '24px' }}>
         <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '26px', fontWeight: 800, color: 'var(--text-primary)', letterSpacing: '-0.5px', marginBottom: '4px' }}>
@@ -74,14 +76,14 @@ const Sensors: React.FC = () => {
       </div>
 
       {/* Sensor selector tabs */}
-      <div style={{ display: 'flex', gap: '8px', marginBottom: '24px' }}>
+      <div style={{ display: 'flex', gap: '8px', marginBottom: '24px', flexWrap: 'wrap' }}>
         {SENSORS.map(s => (
           <button
             key={s.key}
             onClick={() => setActive(s.key)}
             style={{
               display: 'flex', alignItems: 'center', gap: '8px',
-              padding: '10px 18px', borderRadius: 'var(--radius-md)',
+              padding: isMobile ? '9px 14px' : '10px 18px', borderRadius: 'var(--radius-md)',
               border: `1px solid ${active === s.key ? s.color + '60' : 'var(--border)'}`,
               background: active === s.key ? s.color + '12' : 'var(--bg-card)',
               color: active === s.key ? s.color : 'var(--text-secondary)',
@@ -98,8 +100,8 @@ const Sensors: React.FC = () => {
       {/* Current reading hero */}
       <div style={{
         background: 'var(--bg-card)', border: `1px solid ${sensor.color}30`,
-        borderRadius: 'var(--radius-xl)', padding: '28px 32px', marginBottom: '16px',
-        display: 'flex', alignItems: 'center', gap: '40px', flexWrap: 'wrap',
+        borderRadius: 'var(--radius-xl)', padding: isMobile ? '22px' : '28px 32px', marginBottom: '16px',
+        display: 'flex', alignItems: 'center', gap: isMobile ? '24px' : '40px', flexWrap: 'wrap',
       }}>
         <div>
           <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.6px' }}>
@@ -159,7 +161,7 @@ const Sensors: React.FC = () => {
         </div>
 
         {/* Stat boxes */}
-        <div style={{ display: 'flex', gap: '10px', flexShrink: 0 }}>
+        <div style={{ display: 'flex', gap: '10px', flexShrink: 0, width: isMobile ? '100%' : undefined }}>
           <StatBox label="Session Min" value={hasStats ? `${min}${sensor.unit}` : '—'} />
           <StatBox label="Session Max" value={hasStats ? `${max}${sensor.unit}` : '—'} />
           <StatBox label="Average" value={hasStats ? `${avg}${sensor.unit}` : '—'} color={sensor.color} />

@@ -82,3 +82,25 @@ input, textarea { font-family: var(--font-body); }
 }
 
 .fade-up { animation: fadeUp 0.5s ease both; }
+
+/* ── Onboarding mascot ──────────────────────────────────────────────────────── */
+@keyframes mascot-float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+@keyframes mascot-sway { 0%, 100% { transform: rotate(-5deg); } 50% { transform: rotate(5deg); } }
+@keyframes mascot-sway-alt { 0%, 100% { transform: rotate(4deg); } 50% { transform: rotate(-4deg); } }
+@keyframes mascot-blink { 0%, 90%, 100% { transform: scaleY(1); } 95% { transform: scaleY(0.12); } }
+@keyframes mascot-drop { 0% { transform: translateY(-4px); opacity: 0; } 25% { opacity: 1; } 100% { transform: translateY(26px); opacity: 0; } }
+@keyframes mascot-glow { 0%, 100% { opacity: 0.45; } 50% { opacity: 0.9; } }
+
+/* ── Mobile niceties ────────────────────────────────────────────────────────── */
+* { -webkit-tap-highlight-color: transparent; }
+
+@media (max-width: 768px) {
+  html, body { overflow-x: hidden; }
+  /* Keep form inputs at 16px so iOS Safari doesn't auto-zoom on focus */
+  input, textarea, select { font-size: 16px !important; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; }
+}
+
