@@ -17,15 +17,17 @@ const ZONE_SHAPES = [
   { id: 'z4', points: '90,85 155,85 155,145 90,145', label: 'West', cx: 122, cy: 115 },
 ];
 
-const getMoistureColor = (moisture: number, status: string): { fill: string; stroke: string; glow: string } => {
+const getMoistureColor = (moisture: number | null, status: string): { fill: string; stroke: string; glow: string } => {
   if (status === 'active') return { fill: 'rgba(93,234,138,0.22)', stroke: '#5dea8a', glow: 'rgba(93,234,138,0.5)' };
+  if (moisture == null) return { fill: 'rgba(120,140,125,0.06)', stroke: '#3a4d3e', glow: 'rgba(77,107,81,0.2)' };
   if (moisture >= 70) return { fill: 'rgba(91,191,239,0.18)', stroke: '#5bbfef', glow: 'rgba(91,191,239,0.4)' };
   if (moisture >= 50) return { fill: 'rgba(74,222,128,0.14)', stroke: '#4ade80', glow: 'rgba(74,222,128,0.3)' };
   if (moisture >= 35) return { fill: 'rgba(251,191,36,0.15)', stroke: '#fbbf24', glow: 'rgba(251,191,36,0.35)' };
   return { fill: 'rgba(248,113,113,0.15)', stroke: '#f87171', glow: 'rgba(248,113,113,0.35)' };
 };
 
-const getMoistureLabel = (moisture: number) => {
+const getMoistureLabel = (moisture: number | null) => {
+  if (moisture == null) return 'No data';
   if (moisture >= 70) return 'Saturated';
   if (moisture >= 50) return 'Healthy';
   if (moisture >= 35) return 'Low';
@@ -88,8 +90,9 @@ const FieldMap: React.FC<Props> = ({ zones }) => {
     return { x, y };
   };
 
-  const overallHealth = Math.round(zones.reduce((a, z) => a + z.moisture, 0) / zones.length);
-  const healthColor = overallHealth >= 60 ? '#4ade80' : overallHealth >= 40 ? '#fbbf24' : '#f87171';
+  const knownMoistures = zones.map(z => z.moisture).filter((m): m is number => m != null);
+  const overallHealth = knownMoistures.length ? Math.round(knownMoistures.reduce((a, b) => a + b, 0) / knownMoistures.length) : null;
+  const healthColor = overallHealth == null ? 'var(--text-muted)' : overallHealth >= 60 ? '#4ade80' : overallHealth >= 40 ? '#fbbf24' : '#f87171';
 
   return (
     <div style={{
@@ -120,7 +123,7 @@ const FieldMap: React.FC<Props> = ({ zones }) => {
         </div>
         <div style={{ textAlign: 'right' }}>
           <div style={{ fontFamily: 'var(--font-display)', fontSize: '22px', fontWeight: 800, color: healthColor, letterSpacing: '-0.5px', lineHeight: 1 }}>
-            {overallHealth}%
+            {overallHealth == null ? '—' : `${overallHealth}%`}
           </div>
           <div style={{ fontSize: '10px', color: 'var(--text-muted)', marginTop: '2px' }}>avg moisture</div>
         </div>
@@ -171,7 +174,9 @@ const FieldMap: React.FC<Props> = ({ zones }) => {
           {ZONE_SHAPES.map(shape => {
             const zone = zones.find(z => z.id === shape.id);
             if (!zone) return null;
-            const col = getMoistureColor(zone.moisture, zone.status);
+            const mv = zone.moisture;
+            const hasM = mv != null;
+            const col = getMoistureColor(mv, zone.status);
             const isActive = zone.status === 'active';
 
             return (
@@ -201,7 +206,7 @@ const FieldMap: React.FC<Props> = ({ zones }) => {
                   const cx = minX + (col2 / (cols - 1)) * (maxX - minX);
                   const cy = minY + (row / (rows - 1)) * (maxY - minY);
                   const jitter = (Math.sin(i * 7.3 + shape.cx) * 3);
-                  const intensity = (zone.moisture / 100) * (0.6 + Math.sin(i * 2.1) * 0.4);
+                  const intensity = ((zone.moisture ?? 0) / 100) * (0.6 + Math.sin(i * 2.1) * 0.4);
                   return (
                     <circle
                       key={i}
@@ -253,7 +258,7 @@ const FieldMap: React.FC<Props> = ({ zones }) => {
                   opacity="0.9"
                   fontFamily="monospace"
                 >
-                  {zone.moisture}%
+                  {zone.moisture != null ? `${zone.moisture}%` : '—'}
                 </text>
                 <text
                   x={shape.cx}

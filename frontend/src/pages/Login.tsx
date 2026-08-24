@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { Droplets, Eye, EyeOff, ArrowRight, ArrowLeft } from 'lucide-react';
+import { Droplets, Eye, EyeOff, ArrowRight, ArrowLeft, Loader2 } from 'lucide-react';
+import { signIn, DEMO_EMAIL, DEMO_PASSWORD } from '../lib/auth';
 
 interface Props {
   onLogin: () => void;
@@ -12,10 +13,23 @@ const Login: React.FC<Props> = ({ onLogin, onBack, onSignUp }) => {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
+    if (loading) return;
     if (!email.trim() || !password) { setError('Please fill in all fields.'); return; }
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) { setError('Enter a valid email address.'); return; }
+    setError('');
+    setLoading(true);
+    const res = await signIn(email, password);
+    setLoading(false);
+    if (!res.ok) { setError(res.error); return; }
+    onLogin();
+  };
+
+  const enterDemo = () => {
+    setEmail(DEMO_EMAIL);
+    setPassword(DEMO_PASSWORD);
     setError('');
     onLogin();
   };
@@ -134,17 +148,42 @@ const Login: React.FC<Props> = ({ onLogin, onBack, onSignUp }) => {
 
           <button
             onClick={handleSubmit}
+            disabled={loading}
             style={{
               display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
               background: 'var(--accent-primary)',
               border: 'none', borderRadius: 'var(--radius-sm)',
               padding: '12px', fontSize: '14px', fontWeight: 700,
               color: 'var(--text-on-accent)',
-              cursor: 'pointer',
+              cursor: loading ? 'default' : 'pointer',
+              opacity: loading ? 0.7 : 1,
               transition: 'all 0.15s', marginTop: '4px',
             }}
           >
-            <span>Sign In</span><ArrowRight size={14} />
+            {loading
+              ? <><Loader2 size={15} style={{ animation: 'spin 0.7s linear infinite' }} /><span>Signing in…</span></>
+              : <><span>Sign In</span><ArrowRight size={14} /></>}
+          </button>
+
+          {/* Demo access — instant entry, no sign-up or email verification */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginTop: '4px' }}>
+            <div style={{ flex: 1, height: '1px', background: 'var(--border)' }} />
+            <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>or</span>
+            <div style={{ flex: 1, height: '1px', background: 'var(--border)' }} />
+          </div>
+          <button
+            onClick={enterDemo}
+            style={{
+              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
+              background: 'var(--bg-surface)', border: '1px solid var(--border)',
+              borderRadius: 'var(--radius-sm)', padding: '11px',
+              fontSize: '13px', fontWeight: 600, color: 'var(--text-secondary)', cursor: 'pointer',
+              transition: 'border-color 0.15s',
+            }}
+            onMouseEnter={e => (e.currentTarget as HTMLElement).style.borderColor = 'var(--accent-primary)'}
+            onMouseLeave={e => (e.currentTarget as HTMLElement).style.borderColor = 'var(--border)'}
+          >
+            Explore the demo — no sign-up needed
           </button>
         </div>
 

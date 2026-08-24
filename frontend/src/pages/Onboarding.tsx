@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import {
   Droplets, ArrowRight, ArrowLeft, Check,
-  Eye, EyeOff, Cpu, Leaf, Sprout
+  Eye, EyeOff, Cpu, Leaf, Sprout, Loader2
 } from 'lucide-react';
 import { CROPS, GROWTH_STAGES, SOIL_TYPES, saveFarmProfile } from '../lib/farm';
+import { signUp } from '../lib/auth';
 
 interface Props {
   onComplete: () => void;
@@ -81,12 +82,18 @@ const AccountStep: React.FC<{ onNext: (data: { name: string; email: string }) =>
   const [show, setShow] = useState(false);
   const [focused, setFocused] = useState('');
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  const submit = () => {
+  const submit = async () => {
+    if (loading) return;
     if (!name.trim() || !email.trim() || !password.trim()) { setError('Please fill in all fields.'); return; }
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) { setError('Enter a valid email address.'); return; }
     if (password.length < 6) { setError('Password must be at least 6 characters.'); return; }
     setError('');
+    setLoading(true);
+    const res = await signUp(name, email, password);
+    setLoading(false);
+    if (!res.ok) { setError(res.error); return; }
     onNext({ name: name.trim(), email: email.trim() });
   };
 
@@ -114,12 +121,15 @@ const AccountStep: React.FC<{ onNext: (data: { name: string; email: string }) =>
         </div>
       </div>
       {error && <ErrorNote>{error}</ErrorNote>}
-      <button onClick={submit} style={{
+      <button onClick={submit} disabled={loading} style={{
         display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
         background: 'var(--accent-primary)', border: 'none', borderRadius: 'var(--radius-sm)', padding: '12px',
-        fontSize: '14px', fontWeight: 700, color: 'var(--text-on-accent)', cursor: 'pointer', marginTop: '4px',
+        fontSize: '14px', fontWeight: 700, color: 'var(--text-on-accent)', cursor: loading ? 'default' : 'pointer',
+        opacity: loading ? 0.7 : 1, marginTop: '4px',
       }}>
-        <span>Continue</span><ArrowRight size={14} />
+        {loading
+          ? <><Loader2 size={14} style={{ animation: 'spin 0.7s linear infinite' }} /><span>Creating account…</span></>
+          : <><span>Continue</span><ArrowRight size={14} /></>}
       </button>
     </div>
   );
