@@ -10,17 +10,19 @@ import Login from './pages/Login';
 import Onboarding from './pages/Onboarding';
 import { LiveDataProvider } from './hooks/useLiveData';
 import { useIsMobile } from './hooks/useIsMobile';
-import { supabase, signOut } from './lib/auth';
+import { supabase, signOut, hasAppSession } from './lib/auth';
 
 type AppView = 'landing' | 'login' | 'onboarding' | 'app';
 
 const App: React.FC = () => {
   const isMobile = useIsMobile();
-  const [view, setView] = useState<AppView>('landing');
+  // Start in the app if a session was saved locally, so a page reload keeps
+  // signed-in users where they were instead of bouncing them to the landing page.
+  const [view, setView] = useState<AppView>(() => (hasAppSession() ? 'app' : 'landing'));
   const [activePage, setActivePage] = useState('dashboard');
 
-  // Restore an existing Supabase session so returning, signed-in users land
-  // straight in the app. (The demo login has no session, so it never auto-enters.)
+  // Confirm against Supabase in the background. If a real session exists, stay in
+  // the app; the local flag already handles demo and not-yet-confirmed accounts.
   useEffect(() => {
     let mounted = true;
     supabase.auth.getSession().then(({ data }) => {

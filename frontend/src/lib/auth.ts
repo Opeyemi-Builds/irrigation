@@ -21,6 +21,37 @@ export const DEMO_PASSWORD = 'agrosense';
 export const isDemoCredentials = (email: string, password: string): boolean =>
   email.trim().toLowerCase() === DEMO_EMAIL && password === DEMO_PASSWORD;
 
+// ── App session (survives page reload) ───────────────────────────────────────
+// A lightweight flag kept in localStorage so refreshing the page keeps you
+// signed in. Supabase persists its own session for confirmed accounts, but the
+// demo login and any not-yet-confirmed account have no Supabase session to fall
+// back on — this covers all three.
+const SESSION_KEY = 'agrosense.session';
+
+export function markSignedIn(email: string): void {
+  try {
+    localStorage.setItem(SESSION_KEY, JSON.stringify({ email, at: Date.now() }));
+  } catch {
+    /* storage unavailable (private mode) — session just won't persist */
+  }
+}
+
+export function hasAppSession(): boolean {
+  try {
+    return localStorage.getItem(SESSION_KEY) !== null;
+  } catch {
+    return false;
+  }
+}
+
+export function clearAppSession(): void {
+  try {
+    localStorage.removeItem(SESSION_KEY);
+  } catch {
+    /* nothing to clear */
+  }
+}
+
 // ── Result type ──────────────────────────────────────────────────────────────
 export type AuthResult = { ok: true } | { ok: false; error: string };
 
@@ -41,11 +72,15 @@ const friendly = (message: string): string => {
 // ── Sign in ──────────────────────────────────────────────────────────────────
 export async function signIn(email: string, password: string): Promise<AuthResult> {
   // Master/demo account: instant entry, no network, no verification.
-  if (isDemoCredentials(email, password)) return { ok: true };
+  if (isDemoCredentials(email, password)) {
+    markSignedIn(DEMO_EMAIL);
+    return { ok: true };
+  }
 
   // Everyone else must be a real, signed-up account.
   const { error } = await supabase.auth.signInWithPassword({ email: email.trim(), password });
   if (error) return { ok: false, error: friendly(error.message) };
+  markSignedIn(email.trim());
   return { ok: true };
 }
 
@@ -60,10 +95,12 @@ export async function signUp(name: string, email: string, password: string): Pro
     options: { data: { full_name: name.trim() } },
   });
   if (error) return { ok: false, error: friendly(error.message) };
+  markSignedIn(email.trim());
   return { ok: true };
 }
 
 // ── Sign out ─────────────────────────────────────────────────────────────────
 export async function signOut(): Promise<void> {
+  clearAppSession();
   await supabase.auth.signOut();
 }

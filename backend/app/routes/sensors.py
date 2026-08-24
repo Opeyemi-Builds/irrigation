@@ -6,7 +6,6 @@ from app import store, db
 router = APIRouter(prefix="/sensors", tags=["Sensors"])
 
 
-# ── Inbound model (matches ESP32 JSON payload exactly) ────────────────────────
 class TelemetryPayload(BaseModel):
     temperature: float
     humidity: float
@@ -16,14 +15,10 @@ class TelemetryPayload(BaseModel):
     is_charging: bool
 
 
-# ── POST /api/v1/sensors/telemetry ───────────────────────────────────────────
 @router.post("/telemetry", status_code=200)
 async def receive_telemetry(payload: TelemetryPayload, background_tasks: BackgroundTasks):
-    """
-    Called by the ESP32 every 5 seconds.
-    Stores the latest reading in memory (for instant /live reads) AND persists
-    it to Supabase in the background, then returns acknowledgement.
-    """
+    """Ingest one reading from the ESP32 (posted every ~5s). Stores it in memory for
+    instant /live reads and persists it to Supabase in the background."""
     reservoir_pct = store.distance_to_pct(payload.water_level_cm)
 
     reading = store.LiveReading(
@@ -38,24 +33,19 @@ async def receive_telemetry(payload: TelemetryPayload, background_tasks: Backgro
     )
     store.set_reading(reading)
 
-    # Persist after responding, so a slow/absent DB never delays the ESP32.
     background_tasks.add_task(db.insert_reading, reading.model_dump())
 
     return {
         "status": "ok",
         "reservoir_pct": reservoir_pct,
         "pump_status": payload.pump_status,
-        "stored": db.is_configured(),   # True once Supabase keys are set
+        "stored": db.is_configured(),
     }
 
 
-# ── GET /api/v1/sensors/live ─────────────────────────────────────────────────
 @router.get("/live")
 async def get_live_data():
-    """
-    Called by the frontend every 3 seconds to poll latest sensor data.
-    Returns the most recent ESP32 reading plus connection status.
-    """
+    """Latest reading plus connection status. Polled by the dashboard every ~3s."""
     reading = store.get_reading()
     connected = store.is_connected()
 
@@ -73,16 +63,10 @@ async def get_live_data():
     }
 
 
-# ── GET /api/v1/sensors/history ──────────────────────────────────────────────
 @router.get("/history")
 def get_history(hours: int = Query(24, ge=1, le=168)):
-    """
-    Historical readings from Supabase for the last `hours` (default 24, max 168),
-    ordered oldest -> newest. Powers the dashboard trend charts.
-
-    Returns an empty list (with persisted=false) if Supabase isn't configured yet,
-    so the frontend can safely fall back to demo data.
-    """
+    """Historical readings from Supabase for the last `hours` (max 168), oldest first.
+    Returns an empty list with persisted=false when Supabase isn't configured."""
     readings = db.fetch_history(hours=hours)
     return {
         "hours": hours,
@@ -92,10 +76,9 @@ def get_history(hours: int = Query(24, ge=1, le=168)):
     }
 
 
-# ── GET /api/v1/sensors/status ────────────────────────────────────────────────
 @router.get("/status")
 async def device_status():
-    """Quick connection check — used by the frontend status indicator."""
+    """Lightweight connection check for the status indicator."""
     return {
         "connected": store.is_connected(),
         "last_seen": store.get_reading().received_at if store.get_reading() else None,

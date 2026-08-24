@@ -7,8 +7,7 @@ from app.models import (
 from app.config import get_settings
 import json
 
-# ── Crop knowledge base ───────────────────────────────────────────────────────
-# Optimal moisture ranges and water needs per crop + stage
+# Optimal soil-moisture ranges (%) and daily water need (mm) per crop and stage.
 CROP_PROFILES = {
     "maize": {
         "seedling":    {"moisture_min": 50, "moisture_max": 70, "daily_water_mm": 3},
@@ -89,7 +88,6 @@ def _build_system_prompt(
 
     context_blocks = []
 
-    # — Farm identity
     if farm:
         context_blocks.append(f"""FARM PROFILE:
 - Farm name: {farm.farm_name}
@@ -97,13 +95,11 @@ def _build_system_prompt(
 - Soil type: {farm.soil_type} ({SOIL_DRAINAGE.get(farm.soil_type, 'unknown')})
 - Field area: {farm.area_hectares} hectares""")
 
-    # — Crop requirements
     if crop_info and farm:
         context_blocks.append(f"""CROP REQUIREMENTS FOR {farm.crop.upper()} ({farm.growth_stage.upper()} STAGE):
 - Optimal soil moisture: {crop_info['moisture_min']}–{crop_info['moisture_max']}%
 - Daily water need: ~{crop_info['daily_water_mm']}mm/day (~{round(crop_info['daily_water_mm'] * (farm.area_hectares * 10000) / 1000)} litres/day for this field)""")
 
-    # — Live sensor readings
     if sensors:
         moisture_status = "CRITICAL - below minimum" if (crop_info and sensors.soil_moisture < crop_info['moisture_min']) \
             else "WARNING - slightly low" if (crop_info and sensors.soil_moisture < crop_info['moisture_min'] + 5) \
@@ -114,19 +110,17 @@ def _build_system_prompt(
 - Humidity: {sensors.humidity}%
 - Soil moisture: {sensors.soil_moisture}% [{moisture_status}]""")
 
-    # — Weather
     if weather:
         rain_alert = ""
         if weather.rain_probability_3h >= 60:
-            rain_alert = f" ⚠️ HIGH RAIN PROBABILITY IN 3H — recommend holding irrigation"
+            rain_alert = " — HIGH rain probability in 3h, recommend holding irrigation"
         elif weather.rain_probability_3h >= 40:
-            rain_alert = f" — moderate rain possible in 3h"
+            rain_alert = " — moderate rain possible in 3h"
         context_blocks.append(f"""WEATHER FORECAST:
 - Current condition: {weather.condition}, {weather.temperature}°C, humidity {weather.humidity}%
 - Rain probability (next 3h): {weather.rain_probability_3h}%{rain_alert}
 - Rain probability (next 6h): {weather.rain_probability_6h}%""")
 
-    # — Irrigation state
     if irrigation:
         last = f"{irrigation.last_irrigated_minutes_ago} minutes ago" if irrigation.last_irrigated_minutes_ago else "unknown"
         context_blocks.append(f"""IRRIGATION STATUS:
@@ -153,8 +147,6 @@ PERSONALITY & RULES:
 """
 
 
-# ── Chat endpoint logic ───────────────────────────────────────────────────────
-
 async def get_ai_response(req: ChatRequest) -> ChatResponse:
     settings = get_settings()
 
@@ -167,7 +159,7 @@ async def get_ai_response(req: ChatRequest) -> ChatResponse:
         irrigation=req.irrigation,
     )
 
-    # Build message history for Claude (keep last 10 turns to manage tokens)
+    # Keep the last 10 turns to bound token use.
     messages = [
         {"role": m.role, "content": m.content}
         for m in req.history[-10:]
@@ -175,7 +167,7 @@ async def get_ai_response(req: ChatRequest) -> ChatResponse:
     messages.append({"role": "user", "content": req.message})
 
     response = client.messages.create(
-        model="claude-haiku-4-5-20251001",  # fast + cheap for chat
+        model="claude-haiku-4-5-20251001",
         max_tokens=600,
         system=system,
         messages=messages,
@@ -183,7 +175,7 @@ async def get_ai_response(req: ChatRequest) -> ChatResponse:
 
     reply_text = response.content[0].text
 
-    # Simple heuristic to surface a suggested action for the frontend
+    # Surface a suggested action the frontend can act on.
     lower = reply_text.lower()
     suggested_action = None
     if any(w in lower for w in ["irrigate now", "start irrigation", "run irrigation", "turn on"]):
@@ -196,13 +188,8 @@ async def get_ai_response(req: ChatRequest) -> ChatResponse:
     return ChatResponse(reply=reply_text, suggested_action=suggested_action)
 
 
-# ── Irrigation recommendation logic ──────────────────────────────────────────
-
 async def get_irrigation_recommendation(req: IrrigationRecommendationRequest) -> IrrigationRecommendation:
-    """
-    Rule-based + AI hybrid recommendation.
-    Rules handle clear-cut cases fast. AI handles nuance.
-    """
+    """Decide whether to irrigate from crop targets, live moisture, weather and reservoir state."""
     sensors = req.sensor_data
     farm = req.farm_profile
     weather = req.weather
@@ -213,17 +200,13 @@ async def get_irrigation_recommendation(req: IrrigationRecommendationRequest) ->
     moisture_max = crop_info["moisture_max"]
     daily_water_mm = crop_info["daily_water_mm"]
 
-    # Litres needed per mm for this field size
     litres_per_mm = farm.area_hectares * 10000 / 1000
     litres_needed = daily_water_mm * litres_per_mm
 
-    # Estimate irrigation duration (assume ~50 L/min flow rate as placeholder)
     flow_rate_lpm = 50
     duration_minutes = round(litres_needed / flow_rate_lpm)
 
-    # ── Hard rules ────────────────────────────────────────────────────────────
-
-    # Rule 1: Rain coming — hold
+    # Rain coming — hold.
     if weather.rain_probability_3h >= 65:
         return IrrigationRecommendation(
             should_irrigate=False,
@@ -231,7 +214,7 @@ async def get_irrigation_recommendation(req: IrrigationRecommendationRequest) ->
             urgency="hold",
         )
 
-    # Rule 2: Reservoir critically low — hold
+    # Reservoir critically low — hold.
     if irrigation.reservoir_level_pct < 10:
         return IrrigationRecommendation(
             should_irrigate=False,
@@ -239,7 +222,7 @@ async def get_irrigation_recommendation(req: IrrigationRecommendationRequest) ->
             urgency="hold",
         )
 
-    # Rule 3: Soil already saturated — hold
+    # Soil already saturated — hold.
     if sensors.soil_moisture > moisture_max + 5:
         return IrrigationRecommendation(
             should_irrigate=False,
@@ -247,7 +230,7 @@ async def get_irrigation_recommendation(req: IrrigationRecommendationRequest) ->
             urgency="hold",
         )
 
-    # Rule 4: Critically dry — irrigate now
+    # Critically dry — irrigate now.
     if sensors.soil_moisture < moisture_min - 10:
         return IrrigationRecommendation(
             should_irrigate=True,
@@ -256,7 +239,7 @@ async def get_irrigation_recommendation(req: IrrigationRecommendationRequest) ->
             urgency="now",
         )
 
-    # Rule 5: Below optimal, no rain coming — irrigate soon
+    # Below optimal with no rain coming — irrigate soon.
     if sensors.soil_moisture < moisture_min:
         urgency = "now" if weather.rain_probability_6h < 40 else "soon"
         return IrrigationRecommendation(
@@ -266,7 +249,7 @@ async def get_irrigation_recommendation(req: IrrigationRecommendationRequest) ->
             urgency=urgency,
         )
 
-    # Rule 6: Within range and recently irrigated — hold
+    # In range and recently irrigated — hold.
     if (irrigation.last_irrigated_minutes_ago is not None
             and irrigation.last_irrigated_minutes_ago < 120
             and sensors.soil_moisture >= moisture_min):
@@ -276,7 +259,7 @@ async def get_irrigation_recommendation(req: IrrigationRecommendationRequest) ->
             urgency="later",
         )
 
-    # Rule 7: Within range, schedule for later
+    # In range — schedule for later.
     return IrrigationRecommendation(
         should_irrigate=False,
         reason=f"Soil moisture is healthy at {sensors.soil_moisture:.0f}% (optimal: {moisture_min}–{moisture_max}%). Next irrigation recommended in a few hours.",

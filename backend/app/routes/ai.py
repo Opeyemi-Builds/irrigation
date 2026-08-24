@@ -8,17 +8,8 @@ router = APIRouter(prefix="/ai", tags=["AI"])
 
 @router.post("/chat", response_model=ChatResponse)
 async def chat(req: ChatRequest):
-    """
-    Main AI advisor chat endpoint.
-
-    Send the farmer's message along with optional live context:
-    - sensor_data: current temperature, humidity, soil moisture
-    - farm_profile: crop, growth stage, soil type
-    - weather: forecast with rain probability
-    - irrigation: current irrigation state and reservoir level
-
-    The AI will use all provided context to give specific, grounded advice.
-    """
+    """AI advisor chat. Takes the farmer's message plus optional live context
+    (sensors, farm profile, weather, irrigation) and returns grounded advice."""
     try:
         return await ai_service.get_ai_response(req)
     except anthropic.AuthenticationError:
@@ -37,15 +28,8 @@ async def chat(req: ChatRequest):
 
 @router.post("/recommend-irrigation", response_model=IrrigationRecommendation)
 async def recommend_irrigation(req: IrrigationRecommendationRequest):
-    """
-    Automated irrigation recommendation engine.
-
-    Given current sensor data, crop profile, weather forecast, and irrigation
-    status — returns a should_irrigate decision with reason and urgency level.
-
-    This is called by the backend scheduler or the frontend on page load.
-    Urgency levels: "now" | "soon" | "later" | "hold"
-    """
+    """Rule-based irrigation decision. Returns should_irrigate, a reason, an
+    optional duration, and an urgency of now | soon | later | hold."""
     try:
         return await ai_service.get_irrigation_recommendation(req)
     except Exception as e:

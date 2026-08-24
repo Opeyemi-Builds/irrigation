@@ -2,15 +2,11 @@ from pydantic import BaseModel
 from typing import Literal, Optional
 
 
-# ── Sensor data ──────────────────────────────────────────────────────────────
-
 class SensorReading(BaseModel):
     temperature: float      # °C
     humidity: float         # %
     soil_moisture: float    # %
 
-
-# ── Farm / crop profile ───────────────────────────────────────────────────────
 
 class FarmProfile(BaseModel):
     farm_name: str
@@ -20,15 +16,11 @@ class FarmProfile(BaseModel):
     area_hectares: float = 1.0
 
 
-# ── Irrigation status ─────────────────────────────────────────────────────────
-
 class IrrigationStatus(BaseModel):
     is_active: bool
     last_irrigated_minutes_ago: Optional[int] = None
     reservoir_level_pct: float = 67.0
 
-
-# ── Weather ───────────────────────────────────────────────────────────────────
 
 class WeatherData(BaseModel):
     condition: str
@@ -37,8 +29,6 @@ class WeatherData(BaseModel):
     rain_probability_3h: float   # 0–100
     rain_probability_6h: float
 
-
-# ── AI chat models ────────────────────────────────────────────────────────────
 
 class ChatMessage(BaseModel):
     role: Literal["user", "assistant"]
@@ -58,8 +48,6 @@ class ChatResponse(BaseModel):
     reply: str
     suggested_action: Optional[str] = None   # "irrigate" | "hold" | "reduce" | None
 
-
-# ── Irrigation recommendation ─────────────────────────────────────────────────
 
 class IrrigationRecommendationRequest(BaseModel):
     sensor_data: SensorReading

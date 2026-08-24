@@ -9,9 +9,9 @@ class Settings(BaseSettings):
     farm_lon: float = 3.9470
     frontend_url: str = "http://localhost:5173"
 
-    # Supabase (database). Leave both blank to run on in-memory data only.
-    supabase_url: str = ""            # e.g. https://xxxx.supabase.co
-    supabase_service_key: str = ""    # service_role key — SECRET, backend only
+    # Leave both blank to run without a database (in-memory only).
+    supabase_url: str = ""
+    supabase_service_key: str = ""
 
     class Config:
         env_file = ".env"
