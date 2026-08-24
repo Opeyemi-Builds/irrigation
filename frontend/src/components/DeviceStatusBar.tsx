@@ -1,68 +1,56 @@
 import React from 'react';
-import { Wifi, WifiOff, Radio, AlertTriangle } from 'lucide-react';
+import { Radio, WifiOff, Zap, Battery } from 'lucide-react';
 
 interface Props {
   deviceConnected: boolean;
-  usingMockData: boolean;
-  statusMessage: string;
-  lastUpdated: string;
-  pumpStatus: boolean;
-  isCharging: boolean;
+  hasData: boolean;
+  lastUpdated: string | null;
+  pumpStatus: boolean | null;
+  isCharging: boolean | null;
 }
 
+// Calm two-state indicator: the device is either streaming live, or we're
+// waiting for it. No "demo", no "offline" alarm — just an honest status.
 const DeviceStatusBar: React.FC<Props> = ({
   deviceConnected,
-  usingMockData,
-  statusMessage,
+  hasData,
   lastUpdated,
   pumpStatus,
   isCharging,
 }) => {
-  const isLive = deviceConnected && !usingMockData;
+  const isLive = deviceConnected && hasData;
 
   return (
     <div style={{
       display: 'flex', alignItems: 'center', gap: '12px',
-      background: isLive
-        ? 'rgba(93,234,138,0.06)'
-        : usingMockData
-          ? 'rgba(245,166,35,0.06)'
-          : 'rgba(248,113,113,0.06)',
-      border: `1px solid ${isLive
-        ? 'rgba(93,234,138,0.15)'
-        : usingMockData
-          ? 'rgba(245,166,35,0.15)'
-          : 'rgba(248,113,113,0.15)'}`,
+      background: isLive ? 'var(--accent-muted)' : 'var(--bg-card)',
+      border: `1px solid ${isLive ? 'var(--accent-glow)' : 'var(--border)'}`,
       borderRadius: 'var(--radius-md)',
       padding: '8px 16px',
       marginBottom: '20px',
     }}>
-      {/* Connection icon */}
+      {/* Connection status */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexShrink: 0 }}>
-        {isLive ? (
-          <Radio size={13} color="var(--accent-primary)" />
-        ) : usingMockData ? (
-          <AlertTriangle size={13} color="var(--amber)" />
-        ) : (
-          <WifiOff size={13} color="#f87171" />
-        )}
+        {isLive ? <Radio size={13} color="var(--accent-primary)" /> : <WifiOff size={13} color="var(--text-muted)" />}
         <span style={{
           fontSize: '11px', fontWeight: 700,
-          color: isLive ? 'var(--accent-primary)' : usingMockData ? 'var(--amber)' : '#f87171',
+          color: isLive ? 'var(--accent-primary)' : 'var(--text-secondary)',
           textTransform: 'uppercase', letterSpacing: '0.5px',
         }}>
-          {isLive ? 'Live' : usingMockData ? 'Demo Mode' : 'Offline'}
+          {isLive ? 'Live' : 'Waiting for device'}
         </span>
       </div>
 
       <div style={{ width: '1px', height: '14px', background: 'var(--border)' }} />
 
-      {/* Status message */}
+      {/* Message */}
       <span style={{ fontSize: '12px', color: 'var(--text-secondary)', flex: 1 }}>
-        {isLive ? `Device streaming · last ping ${new Date(lastUpdated).toLocaleTimeString()}` : statusMessage}
+        {isLive && lastUpdated
+          ? `Device streaming · last update ${new Date(lastUpdated).toLocaleTimeString()}`
+          : 'Readings will appear here automatically once your device connects.'}
       </span>
 
-      {/* Device stats — only show when live */}
+      {/* Device stats — only when live */}
       {isLive && (
         <div style={{ display: 'flex', gap: '14px', flexShrink: 0 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
@@ -77,8 +65,11 @@ const DeviceStatusBar: React.FC<Props> = ({
             </span>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-            <span style={{ fontSize: '11px', color: isCharging ? '#fbbf24' : 'var(--text-muted)' }}>
-              {isCharging ? '⚡ Charging' : '🔋 Battery'}
+            {isCharging
+              ? <Zap size={12} color="var(--amber)" />
+              : <Battery size={12} color="var(--text-muted)" />}
+            <span style={{ fontSize: '11px', color: isCharging ? 'var(--amber)' : 'var(--text-muted)' }}>
+              {isCharging ? 'Charging' : 'On battery'}
             </span>
           </div>
         </div>

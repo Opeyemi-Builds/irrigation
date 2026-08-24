@@ -2,10 +2,6 @@ import React from 'react';
 import { Pause, Clock, CheckCircle } from 'lucide-react';
 import { IrrigationZone } from '../types';
 
-interface Props {
-  zones: IrrigationZone[];
-}
-
 // Minus must be defined BEFORE statusConfig
 const Minus = (props: any) => (
   <svg {...props} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
@@ -13,11 +9,15 @@ const Minus = (props: any) => (
   </svg>
 );
 
+interface Props {
+  zones: IrrigationZone[];
+}
+
 const statusConfig = {
-  active:    { label: 'Active',    color: '#4ade80',           bg: 'rgba(74,222,128,0.08)',  Icon: CheckCircle },
-  idle:      { label: 'Idle',      color: 'var(--text-muted)', bg: 'transparent',            Icon: Minus },
-  scheduled: { label: 'Scheduled', color: 'var(--blue)',       bg: 'var(--blue-muted)',      Icon: Clock },
-  paused:    { label: 'Paused',    color: 'var(--amber)',      bg: 'var(--amber-muted)',     Icon: Pause },
+  active:    { label: 'Active',    color: 'var(--accent-primary)', bg: 'var(--accent-muted)', Icon: CheckCircle },
+  idle:      { label: 'Idle',      color: 'var(--text-muted)',     bg: 'transparent',         Icon: Minus },
+  scheduled: { label: 'Scheduled', color: 'var(--blue)',           bg: 'var(--blue-muted)',   Icon: Clock },
+  paused:    { label: 'Paused',    color: 'var(--amber)',          bg: 'var(--amber-muted)',  Icon: Pause },
 };
 
 const IrrigationZones: React.FC<Props> = ({ zones }) => {
@@ -32,23 +32,15 @@ const IrrigationZones: React.FC<Props> = ({ zones }) => {
         <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '15px', fontWeight: 700, color: 'var(--text-primary)' }}>
           Irrigation Zones
         </h3>
-        <button style={{
-          background: 'var(--accent-muted)',
-          color: 'var(--accent-primary)',
-          border: '1px solid rgba(93,234,138,0.2)',
-          borderRadius: 'var(--radius-sm)',
-          padding: '5px 12px',
-          fontSize: '11px', fontWeight: 600,
-          cursor: 'pointer',
-        }}>
-          Manage
-        </button>
       </div>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
         {zones.map((zone, i) => {
           const cfg = statusConfig[zone.status];
           const StatusIcon = cfg.Icon;
+          const hasMoisture = zone.moisture != null;
+          const m = zone.moisture ?? 0;
+          const moistureColor = m < 40 ? 'var(--amber)' : m > 70 ? 'var(--blue)' : 'var(--accent-primary)';
           return (
             <div
               key={zone.id}
@@ -60,6 +52,7 @@ const IrrigationZones: React.FC<Props> = ({ zones }) => {
                 padding: '14px 16px',
                 display: 'flex', alignItems: 'center', gap: '14px',
                 animationDelay: `${i * 60}ms`,
+                opacity: zone.linked ? 1 : 0.6,
                 transition: 'border-color 0.2s',
               }}
               onMouseEnter={e => (e.currentTarget as HTMLElement).style.borderColor = 'var(--border)'}
@@ -68,7 +61,7 @@ const IrrigationZones: React.FC<Props> = ({ zones }) => {
               <div style={{
                 width: '38px', height: '38px', borderRadius: '10px',
                 background: cfg.bg,
-                border: `1px solid ${cfg.color}30`,
+                border: `1px solid ${zone.linked ? 'var(--border)' : 'var(--border-subtle)'}`,
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                 color: cfg.color, flexShrink: 0,
               }}>
@@ -80,25 +73,27 @@ const IrrigationZones: React.FC<Props> = ({ zones }) => {
                   {zone.name}
                 </div>
                 <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
-                  {zone.area} ha · Next: <span style={{ color: cfg.color }}>{zone.nextScheduled}</span>
+                  {zone.linked ? 'Connected device' : 'No device linked'}
                 </div>
               </div>
 
               <div style={{ width: '80px', flexShrink: 0 }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
                   <span style={{ fontSize: '10px', color: 'var(--text-muted)' }}>Moisture</span>
-                  <span style={{ fontSize: '10px', fontWeight: 600, color: zone.moisture < 40 ? 'var(--amber)' : 'var(--text-secondary)' }}>
-                    {zone.moisture}%
+                  <span style={{ fontSize: '10px', fontWeight: 600, color: hasMoisture ? (m < 40 ? 'var(--amber)' : 'var(--text-secondary)') : 'var(--text-muted)' }}>
+                    {hasMoisture ? `${m}%` : '—'}
                   </span>
                 </div>
                 <div style={{ height: '4px', background: 'var(--bg-elevated)', borderRadius: '2px', overflow: 'hidden' }}>
-                  <div style={{
-                    height: '100%',
-                    width: `${zone.moisture}%`,
-                    background: zone.moisture < 40 ? 'var(--amber)' : zone.moisture > 70 ? 'var(--blue)' : 'var(--accent-primary)',
-                    borderRadius: '2px',
-                    transition: 'width 0.6s ease',
-                  }} />
+                  {hasMoisture && (
+                    <div style={{
+                      height: '100%',
+                      width: `${m}%`,
+                      background: moistureColor,
+                      borderRadius: '2px',
+                      transition: 'width 0.6s ease',
+                    }} />
+                  )}
                 </div>
               </div>
 

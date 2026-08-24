@@ -4,7 +4,7 @@ export interface SensorReading {
 }
 
 export interface SensorData {
-  current: number;
+  current: number | null;
   unit: string;
   status: 'optimal' | 'warning' | 'critical';
   trend: 'up' | 'down' | 'stable';
@@ -15,10 +15,11 @@ export interface IrrigationZone {
   id: string;
   name: string;
   status: 'active' | 'idle' | 'scheduled' | 'paused';
-  moisture: number;
-  lastIrrigated: string;
-  nextScheduled: string;
-  area: number; // hectares
+  moisture: number | null;
+  lastIrrigated: string | null;
+  nextScheduled: string | null;
+  area: number | null; // hectares
+  linked: boolean; // true when a real device backs this zone
 }
 
 export interface WeatherForecast {
@@ -37,15 +38,12 @@ export interface AIMessage {
   timestamp: string;
 }
 
-export interface DashboardData {
-  temperature: SensorData;
-  humidity: SensorData;
-  soilMoisture: SensorData;
-  zones: IrrigationZone[];
-  forecast: WeatherForecast[];
-  systemStatus: 'all-good' | 'attention' | 'alert';
-  waterSaved: number;
-  lastUpdated: string;
+// A single point in the live history buffer (built from real readings only).
+export interface HistoryPoint {
+  timestamp: string;
+  temperature: number | null;
+  humidity: number | null;
+  soilMoisture: number | null;
 }
 
 // ── Live sensor data from backend ────────────────────────────────────────────

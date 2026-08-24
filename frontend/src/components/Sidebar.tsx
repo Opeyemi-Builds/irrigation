@@ -5,11 +5,10 @@ import {
   Thermometer,
   Wind,
   Bot,
-  Settings,
-  Bell,
   Wifi,
-  ChevronRight
+  WifiOff,
 } from 'lucide-react';
+import { useLiveData } from '../hooks/useLiveData';
 
 interface SidebarProps {
   activePage: string;
@@ -25,6 +24,9 @@ const navItems = [
 ];
 
 const Sidebar: React.FC<SidebarProps> = ({ activePage, onNavigate }) => {
+  const live = useLiveData();
+  const isLive = live.deviceConnected && live.hasData;
+
   return (
     <aside style={{
       width: '220px',
@@ -37,7 +39,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activePage, onNavigate }) => {
       flexShrink: 0,
     }}>
       {/* Logo */}
-      <div style={{ padding: '0 20px 32px' }}>
+      <div style={{ padding: '0 20px 28px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
           <div style={{
             width: '36px', height: '36px',
@@ -56,26 +58,6 @@ const Sidebar: React.FC<SidebarProps> = ({ activePage, onNavigate }) => {
               Smart Irrigation
             </div>
           </div>
-        </div>
-      </div>
-
-      {/* System status badge */}
-      <div style={{ padding: '0 14px 24px' }}>
-        <div style={{
-          background: 'rgba(245, 166, 35, 0.08)',
-          border: '1px solid rgba(245, 166, 35, 0.2)',
-          borderRadius: 'var(--radius-sm)',
-          padding: '8px 12px',
-          display: 'flex', alignItems: 'center', gap: '8px',
-        }}>
-          <div style={{
-            width: '7px', height: '7px',
-            borderRadius: '50%',
-            background: 'var(--amber)',
-            animation: 'pulse-dot 2s ease infinite',
-            flexShrink: 0,
-          }} />
-          <span style={{ fontSize: '11px', color: 'var(--amber)', fontWeight: 500 }}>Attention needed</span>
         </div>
       </div>
 
@@ -142,41 +124,35 @@ const Sidebar: React.FC<SidebarProps> = ({ activePage, onNavigate }) => {
         })}
       </nav>
 
-      {/* Bottom actions */}
-      <div style={{ padding: '16px 10px 0', borderTop: '1px solid var(--border-subtle)' }}>
-        {[
-          { icon: Bell, label: 'Alerts', badge: '3' },
-          { icon: Settings, label: 'Settings' },
-        ].map(({ icon: Icon, label, badge }) => (
-          <button key={label} style={{
-            width: '100%', display: 'flex', alignItems: 'center', gap: '10px',
-            padding: '9px 12px', borderRadius: 'var(--radius-sm)',
-            border: 'none', background: 'transparent',
-            color: 'var(--text-secondary)', fontSize: '13px',
-            cursor: 'pointer', marginBottom: '2px',
-            transition: 'background 0.15s',
-          }}
-          onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = 'var(--bg-elevated)'}
-          onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = 'transparent'}
-          >
-            <Icon size={15} strokeWidth={2} />
-            {label}
-            {badge && (
+      {/* Device status */}
+      <div style={{ padding: '16px 14px 0', borderTop: '1px solid var(--border-subtle)' }}>
+        <div style={{
+          display: 'flex', alignItems: 'center', gap: '8px',
+          padding: '9px 12px',
+          borderRadius: 'var(--radius-sm)',
+          background: isLive ? 'var(--accent-muted)' : 'var(--bg-elevated)',
+          border: `1px solid ${isLive ? 'var(--accent-glow)' : 'var(--border-subtle)'}`,
+        }}>
+          {isLive ? (
+            <>
               <span style={{
-                marginLeft: 'auto',
-                background: 'var(--red)',
-                color: 'white',
-                fontSize: '9px', fontWeight: 700,
-                padding: '1px 5px', borderRadius: '4px',
-              }}>{badge}</span>
-            )}
-          </button>
-        ))}
-
-        {/* Connection status */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '12px 12px 0', marginTop: '8px', borderTop: '1px solid var(--border-subtle)' }}>
-          <Wifi size={11} color="var(--accent-primary)" />
-          <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Connected · 4 sensors</span>
+                width: '7px', height: '7px', borderRadius: '50%',
+                background: 'var(--accent-primary)',
+                animation: 'pulse-dot 2s ease infinite', flexShrink: 0,
+              }} />
+              <Wifi size={13} color="var(--accent-primary)" />
+              <span style={{ fontSize: '11px', color: 'var(--accent-primary)', fontWeight: 600 }}>
+                Device online
+              </span>
+            </>
+          ) : (
+            <>
+              <WifiOff size={13} color="var(--text-muted)" />
+              <span style={{ fontSize: '11px', color: 'var(--text-secondary)', fontWeight: 500 }}>
+                Waiting for device
+              </span>
+            </>
+          )}
         </div>
       </div>
     </aside>

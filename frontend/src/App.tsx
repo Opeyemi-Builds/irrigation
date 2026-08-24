@@ -8,6 +8,7 @@ import AIAdvisorPage from './pages/AIAdvisorPage';
 import Landing from './pages/Landing';
 import Login from './pages/Login';
 import Onboarding from './pages/Onboarding';
+import { LiveDataProvider } from './hooks/useLiveData';
 
 type AppView = 'landing' | 'login' | 'onboarding' | 'app';
 
@@ -55,12 +56,14 @@ const App: React.FC = () => {
   }
 
   return (
-    <div style={{ display: 'flex', height: '100vh', overflow: 'hidden' }}>
-      <Sidebar activePage={activePage} onNavigate={setActivePage} />
-      <main style={{ flex: 1, overflow: 'auto', background: 'var(--bg-base)' }}>
-        {renderPage()}
-      </main>
-    </div>
+    <LiveDataProvider>
+      <div style={{ display: 'flex', height: '100vh', overflow: 'hidden' }}>
+        <Sidebar activePage={activePage} onNavigate={setActivePage} />
+        <main style={{ flex: 1, overflow: 'auto', background: 'var(--bg-base)' }}>
+          {renderPage()}
+        </main>
+      </div>
+    </LiveDataProvider>
   );
 };
 

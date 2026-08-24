@@ -1,0 +1,35 @@
+# Render deployment blueprint for the AgroSense backend (optional).
+#
+# Use this if you want the backend running 24/7 without your PC + ngrok.
+# Steps:
+#   1. Push this repo to GitHub.
+#   2. render.com → New → Blueprint → connect the repo.
+#   3. Render reads this file. Fill in the secret env vars when prompted
+#      (ANTHROPIC_API_KEY, SUPABASE_URL, SUPABASE_SERVICE_KEY).
+#   4. After deploy you get a stable URL like https://agrosense-backend.onrender.com
+#      Use THAT everywhere instead of the ngrok URL:
+#        • firmware api_url  -> https://agrosense-backend.onrender.com/api/v1/sensors/telemetry
+#        • frontend VITE_API_BASE_URL -> https://agrosense-backend.onrender.com
+#
+# Note: Render's free tier sleeps after ~15 min idle and cold-starts on the next
+# request (a few seconds). Fine for a demo; upgrade the plan for always-on.
+
+services:
+  - type: web
+    name: agrosense-backend
+    runtime: python
+    rootDir: no-name/backend
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: ANTHROPIC_API_KEY
+        sync: false            # set in the Render dashboard (secret)
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_SERVICE_KEY
+        sync: false
+      - key: OPENWEATHER_API_KEY
+        sync: false
+      - key: FRONTEND_URL
+        sync: false

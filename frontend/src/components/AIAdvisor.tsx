@@ -1,51 +1,36 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Send, Bot, User, Loader, Sparkles } from 'lucide-react';
 import { AIMessage } from '../types';
-import { mockDashboardData } from '../data/mockData';
+import { useLiveData } from '../hooks/useLiveData';
+import { getFarmProfile } from '../lib/farm';
+import { getAdvisorReply, ADVISOR_SUGGESTIONS, AdvisorContext } from '../lib/advisor';
 
-const API_BASE = (import.meta as any).env.VITE_API_BASE_URL || 'http://localhost:8000';
-const SUGGESTIONS = [
-  'Should I irrigate today?',
-  'Why is my soil moisture dropping?',
-  'What crop diseases should I watch for?',
-  'How much water does my crop need?',
-];
+const SUGGESTIONS = ADVISOR_SUGGESTIONS.slice(0, 4);
 
-// Mock farm profile — in production this comes from onboarding state/localStorage
-const MOCK_FARM = {
-  farm_name: 'Demo Farm',
-  crop: 'maize',
-  growth_stage: 'vegetative',
-  soil_type: 'loamy',
-  area_hectares: 1.0,
-};
+const AIAdvisor: React.FC = () => {
+  const live = useLiveData();
 
-interface AIAdvisorProps {
-  liveTemperature?: number;
-  liveHumidity?: number;
-  liveSoilMoisture?: number;
-  liveReservoirPct?: number;
-  pumpStatus?: boolean;
-}
+  const buildContext = (): AdvisorContext => ({
+    temperature: live.temperature,
+    humidity: live.humidity,
+    soilMoisture: live.soilMoisture,
+    reservoirPct: live.reservoirPct,
+    pumpStatus: live.pumpStatus,
+    hasData: live.hasData,
+    profile: getFarmProfile(),
+  });
 
-const AIAdvisor: React.FC<AIAdvisorProps> = ({
-  liveTemperature,
-  liveHumidity,
-  liveSoilMoisture,
-  liveReservoirPct = 67,
-  pumpStatus = false,
-}) => {
-  const data = mockDashboardData;
-  const temperature  = liveTemperature  ?? data.temperature.current;
-  const humidity     = liveHumidity     ?? data.humidity.current;
-  const soilMoisture = liveSoilMoisture ?? data.soilMoisture.current;
-  const [messages, setMessages] = useState<AIMessage[]>([
+  const [messages, setMessages] = useState<AIMessage[]>(() => [
     {
       id: '0',
       role: 'assistant',
-      content: "Hello! I'm your AI farming advisor. I have live access to your sensor readings and weather forecast. Ask me anything about your farm.",
+      content: getAdvisorReply('hello', {
+        temperature: null, humidity: null, soilMoisture: null,
+        reservoirPct: null, pumpStatus: null, hasData: false,
+        profile: getFarmProfile(),
+      }),
       timestamp: new Date().toISOString(),
-    }
+    },
   ]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
@@ -55,7 +40,7 @@ const AIAdvisor: React.FC<AIAdvisorProps> = ({
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  const sendMessage = async (text: string) => {
+  const sendMessage = (text: string) => {
     if (!text.trim() || loading) return;
 
     const userMsg: AIMessage = {
@@ -68,59 +53,17 @@ const AIAdvisor: React.FC<AIAdvisorProps> = ({
     setInput('');
     setLoading(true);
 
-    try {
-      const history = messages
-        .filter(m => m.id !== '0')
-        .map(m => ({ role: m.role, content: m.content }));
-
-      const res = await fetch(`${API_BASE}/api/v1/ai/chat`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'ngrok-skip-browser-warning': 'true' },
-        body: JSON.stringify({
-          message: text,
-          history,
-          sensor_data: {
-            temperature: temperature,
-            humidity: humidity,
-            soil_moisture: soilMoisture,
-          },
-          farm_profile: MOCK_FARM,
-          weather: {
-            condition: data.forecast[0]?.condition || 'Unknown',
-            temperature: data.forecast[0]?.temp || 28,
-            humidity: data.forecast[0]?.humidity || 65,
-            rain_probability_3h: data.forecast[1]?.rainProbability || 20,
-            rain_probability_6h: data.forecast[2]?.rainProbability || 45,
-          },
-          irrigation: {
-            is_active: pumpStatus,
-            last_irrigated_minutes_ago: 120,
-            reservoir_level_pct: liveReservoirPct,
-          },
-        }),
-      });
-
-      if (!res.ok) throw new Error(`API error: ${res.status}`);
-      const json = await res.json();
-
-      const aiMsg: AIMessage = {
+    // Compute the reply locally from live readings + farm profile.
+    const reply = getAdvisorReply(text, buildContext());
+    window.setTimeout(() => {
+      setMessages(p => [...p, {
         id: (Date.now() + 1).toString(),
         role: 'assistant',
-        content: json.reply,
+        content: reply,
         timestamp: new Date().toISOString(),
-      };
-      setMessages(p => [...p, aiMsg]);
-    } catch (err) {
-      const errMsg: AIMessage = {
-        id: (Date.now() + 1).toString(),
-        role: 'assistant',
-        content: 'Could not reach the AI service. Make sure the backend is running at `http://localhost:8000`.',
-        timestamp: new Date().toISOString(),
-      };
-      setMessages(p => [...p, errMsg]);
-    } finally {
+      }]);
       setLoading(false);
-    }
+    }, 300);
   };
 
   const renderContent = (content: string) => {
@@ -149,14 +92,14 @@ const AIAdvisor: React.FC<AIAdvisorProps> = ({
       height: '520px',
     }}>
       <div style={{ padding: '16px 20px', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', gap: '10px' }}>
-        <div style={{ width: '34px', height: '34px', background: 'var(--accent-muted)', border: '1px solid rgba(93,234,138,0.2)', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div style={{ width: '34px', height: '34px', background: 'var(--accent-muted)', border: '1px solid var(--accent-glow)', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           <Sparkles size={15} color="var(--accent-primary)" />
         </div>
         <div>
           <div style={{ fontFamily: 'var(--font-display)', fontSize: '14px', fontWeight: 700, color: 'var(--text-primary)' }}>AI Farm Advisor</div>
-          <div style={{ fontSize: '11px', color: 'var(--accent-primary)', display: 'flex', alignItems: 'center', gap: '4px' }}>
-            <div style={{ width: '5px', height: '5px', borderRadius: '50%', background: 'var(--accent-primary)', animation: 'pulse-dot 2s ease infinite' }} />
-            Online · Analyzing live data
+          <div style={{ fontSize: '11px', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '4px' }}>
+            <div style={{ width: '5px', height: '5px', borderRadius: '50%', background: live.hasData ? 'var(--accent-primary)' : 'var(--text-muted)', animation: live.hasData ? 'pulse-dot 2s ease infinite' : 'none' }} />
+            {live.hasData ? 'Reading your live sensors' : 'Ready — waiting for device'}
           </div>
         </div>
       </div>
@@ -164,22 +107,22 @@ const AIAdvisor: React.FC<AIAdvisorProps> = ({
       <div style={{ flex: 1, overflowY: 'auto', padding: '16px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
         {messages.map(msg => (
           <div key={msg.id} style={{ display: 'flex', gap: '10px', flexDirection: msg.role === 'user' ? 'row-reverse' : 'row', alignItems: 'flex-start' }}>
-            <div style={{ width: '28px', height: '28px', borderRadius: '8px', flexShrink: 0, background: msg.role === 'assistant' ? 'var(--accent-muted)' : 'var(--bg-elevated)', border: `1px solid ${msg.role === 'assistant' ? 'rgba(93,234,138,0.2)' : 'var(--border)'}`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: msg.role === 'assistant' ? 'var(--accent-primary)' : 'var(--text-secondary)' }}>
+            <div style={{ width: '28px', height: '28px', borderRadius: '8px', flexShrink: 0, background: msg.role === 'assistant' ? 'var(--accent-muted)' : 'var(--bg-elevated)', border: `1px solid ${msg.role === 'assistant' ? 'var(--accent-glow)' : 'var(--border)'}`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: msg.role === 'assistant' ? 'var(--accent-primary)' : 'var(--text-secondary)' }}>
               {msg.role === 'assistant' ? <Bot size={13} /> : <User size={13} />}
             </div>
-            <div style={{ maxWidth: '80%', background: msg.role === 'user' ? 'var(--accent-muted)' : 'var(--bg-surface)', border: `1px solid ${msg.role === 'user' ? 'rgba(93,234,138,0.15)' : 'var(--border-subtle)'}`, borderRadius: msg.role === 'user' ? '12px 4px 12px 12px' : '4px 12px 12px 12px', padding: '10px 14px', fontSize: '12.5px', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
+            <div style={{ maxWidth: '80%', background: msg.role === 'user' ? 'var(--accent-muted)' : 'var(--bg-surface)', border: `1px solid ${msg.role === 'user' ? 'var(--accent-glow)' : 'var(--border-subtle)'}`, borderRadius: msg.role === 'user' ? '12px 4px 12px 12px' : '4px 12px 12px 12px', padding: '10px 14px', fontSize: '12.5px', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
               {renderContent(msg.content)}
             </div>
           </div>
         ))}
         {loading && (
           <div style={{ display: 'flex', gap: '10px', alignItems: 'flex-start' }}>
-            <div style={{ width: '28px', height: '28px', borderRadius: '8px', background: 'var(--accent-muted)', border: '1px solid rgba(93,234,138,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <div style={{ width: '28px', height: '28px', borderRadius: '8px', background: 'var(--accent-muted)', border: '1px solid var(--accent-glow)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               <Bot size={13} color="var(--accent-primary)" />
             </div>
             <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-subtle)', borderRadius: '4px 12px 12px 12px', padding: '10px 14px', display: 'flex', alignItems: 'center', gap: '6px' }}>
               <Loader size={12} color="var(--accent-primary)" style={{ animation: 'spin 1s linear infinite' }} />
-              <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Analyzing data...</span>
+              <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Thinking...</span>
             </div>
           </div>
         )}
@@ -199,7 +142,7 @@ const AIAdvisor: React.FC<AIAdvisorProps> = ({
 
       <div style={{ padding: '12px 16px', borderTop: '1px solid var(--border)', display: 'flex', gap: '8px' }}>
         <input value={input} onChange={e => setInput(e.target.value)} onKeyDown={e => e.key === 'Enter' && sendMessage(input)}
-          placeholder="Ask about irrigation, soil, weather..."
+          placeholder="Ask about irrigation, soil, water..."
           style={{ flex: 1, background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', padding: '8px 12px', fontSize: '12.5px', color: 'var(--text-primary)', outline: 'none', transition: 'border-color 0.15s' }}
           onFocus={e => (e.currentTarget as HTMLElement).style.borderColor = 'var(--accent-primary)'}
           onBlur={e => (e.currentTarget as HTMLElement).style.borderColor = 'var(--border)'}
