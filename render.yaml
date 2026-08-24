@@ -1,0 +1,32 @@
+# Render Blueprint for the AgroSense backend.
+#
+# Deploy: render.com -> New -> Blueprint -> connect this repo. Render reads this
+# file and provisions the service. Set the secret env vars when prompted, or
+# leave them blank to run in-memory (no database, no AI chat, mock weather).
+#
+# After deploy, point these at the service URL (e.g. https://agrosense-api.onrender.com):
+#   firmware api_url            -> <url>/api/v1/sensors/telemetry
+#   frontend VITE_API_BASE_URL  -> <url>
+
+services:
+  - type: web
+    name: agrosense-api
+    runtime: python
+    rootDir: backend
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /health
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.7
+      - key: ANTHROPIC_API_KEY
+        sync: false
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_SERVICE_KEY
+        sync: false
+      - key: OPENWEATHER_API_KEY
+        sync: false
+      - key: FRONTEND_URL
+        sync: false
