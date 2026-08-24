@@ -31,9 +31,8 @@
 const char* ssid     = "YOUR_WIFI_SSID";
 const char* password = "YOUR_WIFI_PASSWORD";
 
-// ⬇ Replace this with your ngrok URL every time you restart ngrok
-// Example: "https://a1b2-102-89-23-14.ngrok-free.app/api/v1/sensors/telemetry"
-const char* api_url  = "https://defensibly-noninfallible-jamika.ngrok-free.dev/api/v1/sensors/telemetry";
+// AgroSense backend on Render. Points at the telemetry endpoint.
+const char* api_url  = "https://agrosense-api-g4nb.onrender.com/api/v1/sensors/telemetry";
 
 // ── Objects ───────────────────────────────────────────────────
 Adafruit_ST7735 tft = Adafruit_ST7735(TFT_CS, TFT_DC, TFT_RST);
@@ -283,7 +282,6 @@ void loop() {
       HTTPClient http;
       http.begin(client, api_url);
       http.addHeader("Content-Type", "application/json");
-      http.addHeader("ngrok-skip-browser-warning", "true");
 
       StaticJsonDocument<256> doc;
       doc["temperature"]    = temperature;
