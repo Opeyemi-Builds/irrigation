@@ -4,6 +4,7 @@
 #include <DHT.h>
 #include <WiFi.h>
 #include <HTTPClient.h>
+#include <WiFiClientSecure.h>
 #include <ArduinoJson.h>
 
 // ── Pin definitions ───────────────────────────────────────────
@@ -277,10 +278,12 @@ void loop() {
     lastApiPost = now;
 
     if (WiFi.status() == WL_CONNECTED) {
+      WiFiClientSecure client;
+      client.setInsecure();
       HTTPClient http;
-      http.begin(api_url);
+      http.begin(client, api_url);
       http.addHeader("Content-Type", "application/json");
-      http.addHeader("ngrok-skip-browser-warning", "true"); // Skip ngrok browser warning
+      http.addHeader("ngrok-skip-browser-warning", "true");
 
       StaticJsonDocument<256> doc;
       doc["temperature"]    = temperature;
