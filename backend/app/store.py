@@ -17,7 +17,7 @@ class LiveReading(BaseModel):
 
 
 _latest: Optional[LiveReading] = None
-_tank_height_cm: float = 30.0    # sensor-to-floor distance of an empty tank; match your hardware
+_tank_height_cm: float = 10.0    # sensor-to-floor distance of an empty tank; match your hardware
 
 
 def set_reading(reading: LiveReading) -> None:
