@@ -42,5 +42,5 @@ def distance_to_pct(distance_cm: float, tank_height_cm: float = _tank_height_cm)
     the top facing down, so a small distance means a full tank. Clamped to 0–100."""
     if distance_cm <= 0:
         return 0.0
-    pct = (tank_height_cm )  * 100
+    pct = (distance_cm )  * 100
     return max(0.0, min(100.0, round(pct, 1)))
