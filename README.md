@@ -76,12 +76,14 @@ The dashboard never commands the device — it is a read-only view of an autonom
 ## Features
 
 ### Field unit (ESP32)
+
 - **Autonomous pump control** with hysteresis (on at ≤60% soil moisture, off at ≥75%) to prevent relay chatter around the setpoint.
 - **On-device TFT dashboard** — live temperature, humidity, soil bar, reservoir distance, pump state, and an animated charge indicator, so the rig is readable in the field with no phone.
 - **Ultrasonic reservoir sensing** — a top-mounted HC-SR04 measures water level and the backend maps it to a fill percentage.
 - **Resilient networking** — telemetry POSTs over HTTPS every 5 s; a failed post never affects the control loop, and Wi-Fi auto-reconnects.
 
 ### Backend (FastAPI)
+
 - **Telemetry ingestion** with instant in-memory live state and optional Supabase history.
 - **Runs with zero configuration** — every setting has a default, so the service boots and serves live data with no environment variables at all.
 - **AI advisor API** (Claude Haiku) that builds a context-loaded prompt from the crop profile, live sensors, weather, and reservoir state.
@@ -89,6 +91,7 @@ The dashboard never commands the device — it is a read-only view of an autonom
 - **Built-in crop knowledge base** — optimal moisture bands and daily water needs for 8 crops across 4 growth stages.
 
 ### Dashboard (React)
+
 - **Live sensor cards** with status bands, trends, and sparklines built from real readings.
 - **Reservoir gauge, combined trend chart, irrigation zones, and a weather strip** with rain-aware messaging.
 - **Offline agronomy advisor** — a deterministic, on-device engine that turns the live readings and the farmer's crop profile into specific guidance, with no API key and no network round-trip.
@@ -99,27 +102,30 @@ The dashboard never commands the device — it is a read-only view of an autonom
 ## Hardware
 
 ### Bill of materials
-| Component | Part | Role |
-|---|---|---|
-| MCU | ESP32 dev board | Control loop, Wi-Fi, telemetry |
-| Temp / humidity | DHT21 (AM2301) | Air temperature and humidity |
-| Soil moisture | Analog probe | Soil moisture (ADC) |
-| Water level | HC-SR04 ultrasonic | Reservoir depth → fill % |
-| Display | ST7735 1.8" TFT (SPI) | On-device readout |
-| Actuator | Relay module | Switches the pump |
-| Power sense | Divider on charge rail | Detects charging/solar |
+
+| Component       | Part                   | Role                           |
+| --------------- | ---------------------- | ------------------------------ |
+| MCU             | ESP32 dev board        | Control loop, Wi-Fi, telemetry |
+| Temp / humidity | DHT21 (AM2301)         | Air temperature and humidity   |
+| Soil moisture   | Analog probe           | Soil moisture (ADC)            |
+| Water level     | HC-SR04 ultrasonic     | Reservoir depth → fill %       |
+| Display         | ST7735 1.8" TFT (SPI)  | On-device readout              |
+| Actuator        | Relay module           | Switches the pump              |
+| Power sense     | Divider on charge rail | Detects charging/solar         |
 
 ### Pin map
-| Signal | ESP32 pin | Notes |
-|---|---|---|
-| TFT CS / DC / RST | GPIO5 / GPIO27 / GPIO4 | Hardware SPI (SCK GPIO18, MOSI GPIO23) |
-| DHT data | GPIO13 | DHT21 |
-| Soil moisture | GPIO34 | ADC1, input-only pin |
-| Ultrasonic TRIG / ECHO | GPIO26 / GPIO25 | Level-shift ECHO to 3.3 V |
-| Relay (pump) | GPIO14 | Active HIGH |
-| Charge sense | GPIO32 | ADC |
+
+| Signal                 | ESP32 pin              | Notes                                  |
+| ---------------------- | ---------------------- | -------------------------------------- |
+| TFT CS / DC / RST      | GPIO5 / GPIO27 / GPIO4 | Hardware SPI (SCK GPIO18, MOSI GPIO23) |
+| DHT data               | GPIO13                 | DHT21                                  |
+| Soil moisture          | GPIO34                 | ADC1, input-only pin                   |
+| Ultrasonic TRIG / ECHO | GPIO26 / GPIO25        | Level-shift ECHO to 3.3 V              |
+| Relay (pump)           | GPIO14                 | Active HIGH                            |
+| Charge sense           | GPIO32                 | ADC                                    |
 
 ### Control logic
+
 The pump is governed by **hysteresis**, not a single threshold:
 
 ```
@@ -131,6 +137,7 @@ soil ≥ 75%  → pump OFF
 This dead-band stops the pump from rapidly switching when the reading hovers near the target. Soil percentage is mapped from the raw ADC with `SOIL_DRY = 3300` (probe in air) and `SOIL_WET = 1200` (probe in water) — recalibrate these two constants for your probe and soil.
 
 ### Reservoir sensing
+
 The ultrasonic sensor sits at the top of the tank facing down, so a **small distance means a full tank**. The backend converts distance to a percentage against a configured tank height (default 30 cm):
 
 ```
@@ -181,12 +188,12 @@ Full wiring and flashing instructions live in [`firmware/README.md`](firmware/RE
 
 ## Tech stack
 
-| Tier | Technologies |
-|---|---|
-| Firmware | ESP32, Arduino C++, Adafruit GFX/ST7735, ArduinoJson, `WiFiClientSecure` |
-| Backend | FastAPI, Uvicorn, Pydantic v2, Anthropic SDK (Claude Haiku), httpx, Supabase (PostgREST) |
-| Frontend | React 18, TypeScript, Vite 5, Recharts, Lucide, date-fns, Supabase JS |
-| Hosting | Render (API), Vercel (dashboard), Supabase (optional history) |
+| Tier     | Technologies                                                                             |
+| -------- | ---------------------------------------------------------------------------------------- |
+| Firmware | ESP32, Arduino C++, Adafruit GFX/ST7735, ArduinoJson, `WiFiClientSecure`                 |
+| Backend  | FastAPI, Uvicorn, Pydantic v2, Anthropic SDK (Claude Haiku), httpx, Supabase (PostgREST) |
+| Frontend | React 18, TypeScript, Vite 5, Recharts, Lucide, date-fns, Supabase JS                    |
+| Hosting  | Render (API), Vercel (dashboard), Supabase (optional history)                            |
 
 ---
 
@@ -242,15 +249,15 @@ Flash to the ESP32. It connects to Wi-Fi and begins posting within a few seconds
 
 Base path: `/api/v1`. Full interactive documentation is served at `/docs`.
 
-| Method | Endpoint | Purpose |
-|---|---|---|
-| `GET` | `/health` | Liveness probe → `{"status":"ok"}` |
-| `POST` | `/api/v1/sensors/telemetry` | Ingest one device reading |
-| `GET` | `/api/v1/sensors/live` | Latest reading + connection status |
-| `GET` | `/api/v1/sensors/history?hours=N` | History from Supabase (1–168 h) |
-| `GET` | `/api/v1/sensors/status` | Lightweight connection check |
-| `POST` | `/api/v1/ai/chat` | Claude advisor chat (needs `ANTHROPIC_API_KEY`) |
-| `POST` | `/api/v1/ai/recommend-irrigation` | Rule-based decision (no key needed) |
+| Method | Endpoint                          | Purpose                                         |
+| ------ | --------------------------------- | ----------------------------------------------- |
+| `GET`  | `/health`                         | Liveness probe → `{"status":"ok"}`              |
+| `POST` | `/api/v1/sensors/telemetry`       | Ingest one device reading                       |
+| `GET`  | `/api/v1/sensors/live`            | Latest reading + connection status              |
+| `GET`  | `/api/v1/sensors/history?hours=N` | History from Supabase (1–168 h)                 |
+| `GET`  | `/api/v1/sensors/status`          | Lightweight connection check                    |
+| `POST` | `/api/v1/ai/chat`                 | Claude advisor chat (needs `ANTHROPIC_API_KEY`) |
+| `POST` | `/api/v1/ai/recommend-irrigation` | Rule-based decision (no key needed)             |
 
 **Telemetry payload** (posted by the device):
 
@@ -259,7 +266,7 @@ Base path: `/api/v1`. Full interactive documentation is served at `/docs`.
   "temperature": 28.5,
   "humidity": 65.0,
   "soil_moisture": 42.0,
-  "water_level_cm": 12.0,
+  "el_cm": 12.0,
   "pump_status": true,
   "is_charging": false
 }
@@ -273,13 +280,13 @@ Endpoint-by-endpoint detail, request/response schemas, and the AI prompt design 
 
 All backend settings are optional — the service runs fully without them, degrading only the corresponding feature.
 
-| Variable | Default | Effect when unset |
-|---|---|---|
-| `ANTHROPIC_API_KEY` | `""` | `/ai/chat` returns 401; the rule engine and dashboard advisor still work |
-| `OPENWEATHER_API_KEY` | `""` | Reserved for live weather (current build uses representative forecast data) |
-| `FARM_LAT` / `FARM_LON` | `7.3775` / `3.9470` | Farm location (Ibadan, NG) |
-| `FRONTEND_URL` | `http://localhost:5173` | CORS origin hint (CORS is open by default) |
-| `SUPABASE_URL` / `SUPABASE_SERVICE_KEY` | `""` | No history persistence; live data is in-memory only |
+| Variable                                | Default                 | Effect when unset                                                           |
+| --------------------------------------- | ----------------------- | --------------------------------------------------------------------------- |
+| `ANTHROPIC_API_KEY`                     | `""`                    | `/ai/chat` returns 401; the rule engine and dashboard advisor still work    |
+| `OPENWEATHER_API_KEY`                   | `""`                    | Reserved for live weather (current build uses representative forecast data) |
+| `FARM_LAT` / `FARM_LON`                 | `7.3775` / `3.9470`     | Farm location (Ibadan, NG)                                                  |
+| `FRONTEND_URL`                          | `http://localhost:5173` | CORS origin hint (CORS is open by default)                                  |
+| `SUPABASE_URL` / `SUPABASE_SERVICE_KEY` | `""`                    | No history persistence; live data is in-memory only                         |
 
 The Supabase **service-role key is secret and lives only in the backend** — it is never shipped to the browser or committed. The frontend needs only `VITE_API_BASE_URL`.
 
@@ -289,11 +296,11 @@ The Supabase **service-role key is secret and lives only in the backend** — it
 
 The system runs on free tiers end to end — Render for the API, Vercel for the dashboard, and the device pointed at the Render URL over HTTPS. The full walkthrough, including the Render Python pin and the Vercel build-time environment variable, is in **[`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md)**.
 
-| Component | Platform | Notes |
-|---|---|---|
-| Backend | Render | Blueprint in `render.yaml`; Python pinned to 3.12.7 |
-| Frontend | Vercel | Set `VITE_API_BASE_URL` in project settings, then redeploy |
-| Device | On-network ESP32 | `api_url` → `<render-url>/api/v1/sensors/telemetry` |
+| Component | Platform         | Notes                                                      |
+| --------- | ---------------- | ---------------------------------------------------------- |
+| Backend   | Render           | Blueprint in `render.yaml`; Python pinned to 3.12.7        |
+| Frontend  | Vercel           | Set `VITE_API_BASE_URL` in project settings, then redeploy |
+| Device    | On-network ESP32 | `api_url` → `<render-url>/api/v1/sensors/telemetry`        |
 
 ---
 
@@ -301,13 +308,13 @@ The system runs on free tiers end to end — Render for the API, Vercel for the 
 
 The dashboard uses a dark, green-tinted agricultural theme defined as CSS custom properties in [`frontend/src/index.css`](frontend/src/index.css), so a re-theme is a single-file edit.
 
-| Token | Value | Use |
-|---|---|---|
-| `--bg-base` | `#0a0f0d` | App background |
-| `--accent-primary` | `#5dea8a` | Primary green / optimal state |
-| `--amber` / `--red` / `--blue` | `#f5a623` / `#ff5e5e` / `#5bbfef` | Warning / critical / info |
-| `--font-display` | Syne | Headings and numerics |
-| `--font-body` | DM Sans | Body and UI labels |
+| Token                          | Value                             | Use                           |
+| ------------------------------ | --------------------------------- | ----------------------------- |
+| `--bg-base`                    | `#0a0f0d`                         | App background                |
+| `--accent-primary`             | `#5dea8a`                         | Primary green / optimal state |
+| `--amber` / `--red` / `--blue` | `#f5a623` / `#ff5e5e` / `#5bbfef` | Warning / critical / info     |
+| `--font-display`               | Syne                              | Headings and numerics         |
+| `--font-body`                  | DM Sans                           | Body and UI labels            |
 
 ---
 
