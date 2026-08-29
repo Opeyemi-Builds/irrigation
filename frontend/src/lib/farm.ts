@@ -122,6 +122,34 @@ export async function hydrateFarmProfileFromCloud(productId: string | null): Pro
   return getFarmProfile();
 }
 
+// De-duplicate a crop list case-insensitively, trimming blanks, preserving order.
+export function dedupeCrops(crops: string[]): string[] {
+  const seen = new Set<string>();
+  return crops
+    .map(c => c.trim())
+    .filter(c => {
+      if (!c) return false;
+      const key = c.toLowerCase();
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+}
+
+// Update just the crop list on the saved profile — the farmer adding or removing
+// crops from an existing farm. De-duplicates, keeps crops[0] as the primary `crop`
+// so single-crop consumers keep working, saves locally, and syncs to the cloud.
+// Returns the updated profile, or null if there's no profile to update yet.
+export async function updateFarmCrops(crops: string[]): Promise<FarmProfile | null> {
+  const current = getFarmProfile();
+  if (!current) return null;
+  const cleaned = dedupeCrops(crops);
+  const updated: FarmProfile = { ...current, crops: cleaned, crop: cleaned[0] ?? '' };
+  saveFarmProfile(updated);
+  await upsertCloudProfile(updated);
+  return updated;
+}
+
 // ── Crop catalogue (used by onboarding + advisor) ────────────────────────────
 export interface CropInfo {
   value: string;
