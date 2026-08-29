@@ -76,6 +76,10 @@ export function LiveDataProvider({ children }: { children: ReactNode }) {
       const json: LiveDataResponse = await res.json();
 
       setDeviceConnected(Boolean(json.connected));
+      // Reflect the pump mode the backend currently holds. Only overwrite when
+      // present, so an optimistic value set by setPumpMode survives a response
+      // from an older backend that doesn't report it.
+      if (json.pump_command) setPumpCommand(json.pump_command);
 
       if (json.data) {
         const data = json.data;
@@ -103,6 +107,31 @@ export function LiveDataProvider({ children }: { children: ReactNode }) {
       // Device/backend not reachable. Keep any last-known real reading, but
       // mark the device as not currently streaming. No error message, no mock.
       setDeviceConnected(false);
+    }
+  }, []);
+
+  // Command the pump mode. Updates the UI optimistically, then POSTs to the
+  // backend; the ESP32 picks the change up on its next telemetry POST (~5s).
+  // On failure we leave the optimistic value — the next /live poll reconciles
+  // it with whatever the backend actually holds.
+  const setPumpMode = useCallback(async (mode: PumpMode) => {
+    setPumpCommand(mode);
+    if (!API_BASE) return;
+    try {
+      const res = await fetch(`${API_BASE}/api/v1/sensors/command`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'ngrok-skip-browser-warning': 'true',
+        },
+        body: JSON.stringify({ mode }),
+        signal: AbortSignal.timeout(4000),
+      });
+      if (!res.ok) throw new Error('command rejected');
+      const json = await res.json();
+      if (json?.mode) setPumpCommand(json.mode as PumpMode);
+    } catch {
+      /* next poll reconciles the UI with the backend's actual command */
     }
   }, []);
 
@@ -166,6 +195,8 @@ export function LiveDataProvider({ children }: { children: ReactNode }) {
     lastUpdated,
     history,
     liveData,
+    pumpCommand,
+    setPumpMode,
   };
 
   return <LiveDataContext.Provider value={value}>{children}</LiveDataContext.Provider>;
