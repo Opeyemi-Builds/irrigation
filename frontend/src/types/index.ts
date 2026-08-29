@@ -58,8 +58,13 @@ export interface LiveSensorData {
   received_at: string;
 }
 
+// Pump control mode. "auto" = on-device soil-moisture hysteresis; "on"/"off" =
+// manual override set from the dashboard.
+export type PumpMode = 'auto' | 'on' | 'off';
+
 export interface LiveDataResponse {
   connected: boolean;
   data: LiveSensorData | null;
   message: string;
+  pump_command?: PumpMode;
 }

@@ -1,4 +1,4 @@
-from fastapi import APIRouter, BackgroundTasks, Query
+from fastapi import APIRouter, BackgroundTasks, Query, HTTPException
 from pydantic import BaseModel
 from datetime import datetime
 from app import store, db
@@ -13,6 +13,10 @@ class TelemetryPayload(BaseModel):
     water_level_cm: float
     pump_status: bool
     is_charging: bool
+
+
+class PumpCommand(BaseModel):
+    mode: str  # "auto" | "on" | "off"
 
 
 @router.post("/telemetry", status_code=200)
@@ -39,6 +43,7 @@ async def receive_telemetry(payload: TelemetryPayload, background_tasks: Backgro
         "status": "ok",
         "reservoir_pct": reservoir_pct,
         "pump_status": payload.pump_status,
+        "pump_command": store.get_pump_command(),  # ESP32 applies this (auto/on/off)
         "stored": db.is_configured(),
     }
 
@@ -53,14 +58,39 @@ async def get_live_data():
         return {
             "connected": False,
             "data": None,
+            "pump_command": store.get_pump_command(),
             "message": "No data received yet. Waiting for device...",
         }
 
     return {
         "connected": connected,
         "data": reading.model_dump(),
+        "pump_command": store.get_pump_command(),
         "message": "ok" if connected else "Device offline — showing last known reading",
     }
+
+
+@router.post("/command")
+async def update_pump_command(cmd: PumpCommand):
+    """Set the pump control mode from the dashboard. The ESP32 reads it back on its
+    next telemetry POST (within ~5s) and applies it: 'auto' hands control to the
+    on-device soil-moisture hysteresis, 'on'/'off' force the pump as a manual
+    override. If the device is offline the command is held and applied on reconnect."""
+    mode = cmd.mode.strip().lower()
+    if mode not in store.VALID_PUMP_COMMANDS:
+        raise HTTPException(
+            status_code=422,
+            detail=f"mode must be one of {list(store.VALID_PUMP_COMMANDS)}",
+        )
+    store.set_pump_command(mode, datetime.utcnow().isoformat())
+    return {"mode": mode, "updated_at": store.get_pump_command_at()}
+
+
+@router.get("/command")
+async def read_pump_command():
+    """Current pump command. The ESP32 also receives this inline on every telemetry
+    POST response, so a separate poll is optional."""
+    return {"mode": store.get_pump_command(), "updated_at": store.get_pump_command_at()}
 
 
 @router.get("/history")

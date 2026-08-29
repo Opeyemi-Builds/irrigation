@@ -75,6 +75,14 @@ bool     relayOn       = false;
 bool     isCharging    = false;
 uint8_t  chargeFrame   = 0;   // 0-4 animation frames
 
+// Pump control mode, received from the backend in each telemetry POST response.
+//   "auto" — soil-moisture hysteresis below (the default)
+//   "on"   — dashboard forced the pump ON
+//   "off"  — dashboard forced the pump OFF
+// Defaults to "auto" so the device waters itself even before the first response
+// (and if the backend is ever unreachable).
+String   pumpMode      = "auto";
+
 // ── Ultrasonic core (median filter + EMA smoothing) ─────────────
 // A single pulseIn() reading jitters a lot on these sensors — one
 // bad echo can swing the reported distance by several cm. This
@@ -383,15 +391,31 @@ void loop() {
     soilPercent   = map(rawSoil, SOIL_DRY, SOIL_WET, 0, 100);
     soilPercent   = constrain(soilPercent, 0, 100);
 
-    // Relay logic — hysteresis to avoid rapid on/off chatter
-    if (soilPercent <= RELAY_ON_THRESHOLD && !relayOn) {
-      relayOn = true;
-      digitalWrite(RELAY_PIN, HIGH);
-      Serial.printf("Soil %d%% <= %d%% — Relay ON\n", soilPercent, RELAY_ON_THRESHOLD);
-    } else if (soilPercent >= RELAY_OFF_THRESHOLD && relayOn) {
-      relayOn = false;
-      digitalWrite(RELAY_PIN, LOW);
-      Serial.printf("Soil %d%% >= %d%% — Relay OFF\n", soilPercent, RELAY_OFF_THRESHOLD);
+    // Relay logic. A manual command from the dashboard ("on"/"off") overrides
+    // everything; in "auto" the pump runs on soil-moisture hysteresis, which
+    // avoids the rapid on/off chatter you'd get from a single threshold.
+    if (pumpMode == "on") {
+      if (!relayOn) {
+        relayOn = true;
+        digitalWrite(RELAY_PIN, HIGH);
+        Serial.println("Manual override — Relay ON");
+      }
+    } else if (pumpMode == "off") {
+      if (relayOn) {
+        relayOn = false;
+        digitalWrite(RELAY_PIN, LOW);
+        Serial.println("Manual override — Relay OFF");
+      }
+    } else {  // "auto"
+      if (soilPercent <= RELAY_ON_THRESHOLD && !relayOn) {
+        relayOn = true;
+        digitalWrite(RELAY_PIN, HIGH);
+        Serial.printf("Soil %d%% <= %d%% — Relay ON\n", soilPercent, RELAY_ON_THRESHOLD);
+      } else if (soilPercent >= RELAY_OFF_THRESHOLD && relayOn) {
+        relayOn = false;
+        digitalWrite(RELAY_PIN, LOW);
+        Serial.printf("Soil %d%% >= %d%% — Relay OFF\n", soilPercent, RELAY_OFF_THRESHOLD);
+      }
     }
 
     // Distance / water level (median-filtered + EMA-smoothed)
@@ -445,7 +469,16 @@ void loop() {
 
       int code = http.POST(body);
       if (code > 0) {
-        Serial.printf("POST %d — %s\n", code, http.getString().c_str());
+        String resp = http.getString();
+        Serial.printf("POST %d — %s\n", code, resp.c_str());
+
+        // The backend echoes the current pump command in its response, so we
+        // pick up dashboard on/off/auto changes here without a second request.
+        StaticJsonDocument<256> respDoc;
+        if (deserializeJson(respDoc, resp) == DeserializationError::Ok) {
+          const char* cmd = respDoc["pump_command"] | "";
+          if (strlen(cmd) > 0) pumpMode = String(cmd);
+        }
       } else {
         Serial.printf("POST failed: %s\n", http.errorToString(code).c_str());
       }

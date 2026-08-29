@@ -44,3 +44,32 @@ def distance_to_pct(distance_cm: float, tank_height_cm: float = _tank_height_cm)
         return 0.0
     pct = ((tank_height_cm - distance_cm) / tank_height_cm) * 100
     return max(0.0, min(100.0, round(pct, 1)))
+
+
+# ── Pump control command ─────────────────────────────────────────────────────
+# One device, one command. The dashboard sets it; the ESP32 reads it back on its
+# next telemetry POST (within ~5s) and applies it:
+#   "auto" — on-device soil-moisture hysteresis (the default behaviour)
+#   "on"   — manual override, pump forced ON
+#   "off"  — manual override, pump forced OFF
+# Held in memory only. A backend restart resets to "auto", which is the safe
+# default: the pump returns to automatic control rather than being left stuck
+# forced on or off with no one watching.
+VALID_PUMP_COMMANDS = ("auto", "on", "off")
+
+_pump_command: str = "auto"
+_pump_command_at: Optional[str] = None
+
+
+def set_pump_command(mode: str, at: str) -> None:
+    global _pump_command, _pump_command_at
+    _pump_command = mode
+    _pump_command_at = at
+
+
+def get_pump_command() -> str:
+    return _pump_command
+
+
+def get_pump_command_at() -> Optional[str]:
+    return _pump_command_at

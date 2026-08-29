@@ -7,7 +7,7 @@ import {
   useCallback,
   ReactNode,
 } from 'react';
-import { LiveSensorData, LiveDataResponse, HistoryPoint } from '../types';
+import { LiveSensorData, LiveDataResponse, HistoryPoint, PumpMode } from '../types';
 
 const API_BASE = (import.meta as any).env.VITE_API_BASE_URL || '';
 const POLL_INTERVAL = 3000; // 3 seconds
@@ -28,6 +28,9 @@ export interface LiveData {
   lastUpdated: string | null;
   history: HistoryPoint[]; // real readings collected this session, oldest → newest
   liveData: LiveSensorData | null;
+  // Pump control — the mode the device is set to, and a setter that commands it.
+  pumpCommand: PumpMode | null; // null until the backend reports one
+  setPumpMode: (mode: PumpMode) => Promise<void>;
 }
 
 const EMPTY: LiveData = {
@@ -43,6 +46,8 @@ const EMPTY: LiveData = {
   lastUpdated: null,
   history: [],
   liveData: null,
+  pumpCommand: null,
+  setPumpMode: async () => {},
 };
 
 const LiveDataContext = createContext<LiveData>(EMPTY);
@@ -53,6 +58,7 @@ export function LiveDataProvider({ children }: { children: ReactNode }) {
   const [lastUpdated, setLastUpdated] = useState<string | null>(null);
   const [history, setHistory] = useState<HistoryPoint[]>([]);
   const lastReceivedAt = useRef<string | null>(null);
+  const [pumpCommand, setPumpCommand] = useState<PumpMode | null>(null);
 
   const poll = useCallback(async () => {
     // No backend configured yet — stay quietly in the "waiting for device"
