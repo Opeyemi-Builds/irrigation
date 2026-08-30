@@ -1,5 +1,6 @@
 """In-memory store for the most recent ESP32 reading. One device, one reading
 at a time — read on every /live poll, replaced on every telemetry POST."""
+import os
 from typing import Optional
 from datetime import datetime
 from pydantic import BaseModel
@@ -73,3 +74,29 @@ def get_pump_command() -> str:
 
 def get_pump_command_at() -> Optional[str]:
     return _pump_command_at
+
+
+# ── Device-linked Product IDs ─────────────────────────────────────────────────
+# A farm is identified by its Product ID (0001–0050), but there is one physical
+# ESP32. These are the IDs "attached" to that real hardware: a farm logged in
+# under one of them sees the device's live readings and can control its pump.
+# Every other ID is still a valid farm (its own name + crops) but has no device,
+# so it shows "waiting for a device" instead of another farm's data.
+#   - 0001 is the main product (the built-in demo account).
+#   - 0002 is attached to the same device too, so a second account can demo it.
+# Override as you add real hardware with the DEVICE_PRODUCT_IDS env var
+# (comma-separated), e.g. DEVICE_PRODUCT_IDS="0001,0002,0009".
+def _parse_device_ids(raw: str) -> frozenset:
+    return frozenset(p.strip().zfill(4) for p in raw.split(",") if p.strip())
+
+
+DEVICE_PRODUCT_IDS = _parse_device_ids(os.getenv("DEVICE_PRODUCT_IDS", "0001,0002"))
+
+
+def is_device_linked(product_id: Optional[str]) -> bool:
+    """True if this Product ID is attached to the physical device. A missing ID
+    is treated as linked, so a direct call or older client that doesn't send one
+    keeps working."""
+    if not product_id:
+        return True
+    return product_id.strip().zfill(4) in DEVICE_PRODUCT_IDS

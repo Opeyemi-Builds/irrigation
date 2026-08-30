@@ -1,6 +1,7 @@
 from fastapi import APIRouter, BackgroundTasks, Query, HTTPException
 from pydantic import BaseModel
 from datetime import datetime
+from typing import Optional
 from app import store, db
 
 router = APIRouter(prefix="/sensors", tags=["Sensors"])
@@ -17,6 +18,7 @@ class TelemetryPayload(BaseModel):
 
 class PumpCommand(BaseModel):
     mode: str  # "auto" | "on" | "off"
+    product_id: Optional[str] = None  # which farm is sending the command
 
 
 @router.post("/telemetry", status_code=200)
@@ -49,14 +51,29 @@ async def receive_telemetry(payload: TelemetryPayload, background_tasks: Backgro
 
 
 @router.get("/live")
-async def get_live_data():
-    """Latest reading plus connection status. Polled by the dashboard every ~3s."""
+async def get_live_data(product_id: Optional[str] = Query(None)):
+    """Latest reading plus connection status. Polled by the dashboard every ~3s.
+
+    `product_id` scopes the request to one farm: only IDs attached to the physical
+    device (see store.DEVICE_PRODUCT_IDS — 0001 and 0002 by default) receive live
+    data. Any other farm gets `linked: false` and no reading, so it shows a
+    "waiting for a device" state rather than another farm's telemetry."""
+    if not store.is_device_linked(product_id):
+        return {
+            "connected": False,
+            "linked": False,
+            "data": None,
+            "pump_command": "auto",
+            "message": "No device is linked to this farm yet.",
+        }
+
     reading = store.get_reading()
     connected = store.is_connected()
 
     if reading is None:
         return {
             "connected": False,
+            "linked": True,
             "data": None,
             "pump_command": store.get_pump_command(),
             "message": "No data received yet. Waiting for device...",
@@ -64,6 +81,7 @@ async def get_live_data():
 
     return {
         "connected": connected,
+        "linked": True,
         "data": reading.model_dump(),
         "pump_command": store.get_pump_command(),
         "message": "ok" if connected else "Device offline — showing last known reading",
@@ -75,12 +93,20 @@ async def update_pump_command(cmd: PumpCommand):
     """Set the pump control mode from the dashboard. The ESP32 reads it back on its
     next telemetry POST (within ~5s) and applies it: 'auto' hands control to the
     on-device soil-moisture hysteresis, 'on'/'off' force the pump as a manual
-    override. If the device is offline the command is held and applied on reconnect."""
+    override. If the device is offline the command is held and applied on reconnect.
+
+    Only a farm attached to the physical device (store.DEVICE_PRODUCT_IDS) may
+    command the pump — other farms have no hardware to control."""
     mode = cmd.mode.strip().lower()
     if mode not in store.VALID_PUMP_COMMANDS:
         raise HTTPException(
             status_code=422,
             detail=f"mode must be one of {list(store.VALID_PUMP_COMMANDS)}",
+        )
+    if not store.is_device_linked(cmd.product_id):
+        raise HTTPException(
+            status_code=403,
+            detail="This farm has no device linked, so its pump can't be controlled.",
         )
     store.set_pump_command(mode, datetime.utcnow().isoformat())
     return {"mode": mode, "updated_at": store.get_pump_command_at()}

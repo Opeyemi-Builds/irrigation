@@ -67,4 +67,5 @@ export interface LiveDataResponse {
   data: LiveSensorData | null;
   message: string;
   pump_command?: PumpMode;
+  linked?: boolean; // is this farm's Product ID attached to the physical device?
 }

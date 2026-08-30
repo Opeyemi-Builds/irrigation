@@ -8,10 +8,18 @@ import {
   ReactNode,
 } from 'react';
 import { LiveSensorData, LiveDataResponse, HistoryPoint, PumpMode } from '../types';
+import { getFarmProfile } from '../lib/farm';
 
 const API_BASE = (import.meta as any).env.VITE_API_BASE_URL || '';
 const POLL_INTERVAL = 3000; // 3 seconds
 const MAX_HISTORY = 240;
+
+// The Product ID of the farm currently signed in, read fresh from the saved
+// profile. It scopes /live + /command so a farm only sees its own device (only
+// IDs attached to the hardware — 0001, 0002 — get live data).
+function currentProductId(): string | null {
+  return getFarmProfile()?.productId ?? null;
+}
 
 export interface LiveData {
   // Sensor values — null until a real reading arrives. No mock fallback.
@@ -25,6 +33,7 @@ export interface LiveData {
   // Meta
   hasData: boolean; // at least one real reading has been received
   deviceConnected: boolean; // backend reports the device is currently streaming
+  deviceLinked: boolean; // this farm's Product ID is attached to the physical device
   lastUpdated: string | null;
   history: HistoryPoint[]; // real readings collected this session, oldest → newest
   liveData: LiveSensorData | null;
@@ -43,6 +52,7 @@ const EMPTY: LiveData = {
   isCharging: null,
   hasData: false,
   deviceConnected: false,
+  deviceLinked: true, // assume linked until the backend says otherwise (avoids a flash)
   lastUpdated: null,
   history: [],
   liveData: null,
@@ -55,6 +65,7 @@ const LiveDataContext = createContext<LiveData>(EMPTY);
 export function LiveDataProvider({ children }: { children: ReactNode }) {
   const [liveData, setLiveData] = useState<LiveSensorData | null>(null);
   const [deviceConnected, setDeviceConnected] = useState(false);
+  const [deviceLinked, setDeviceLinked] = useState(true);
   const [lastUpdated, setLastUpdated] = useState<string | null>(null);
   const [history, setHistory] = useState<HistoryPoint[]>([]);
   const lastReceivedAt = useRef<string | null>(null);
@@ -68,7 +79,13 @@ export function LiveDataProvider({ children }: { children: ReactNode }) {
       return;
     }
     try {
-      const res = await fetch(`${API_BASE}/api/v1/sensors/live`, {
+      // Scope the request to this farm's Product ID so only device-linked farms
+      // (0001, 0002) receive live readings.
+      const pid = currentProductId();
+      const url = pid
+        ? `${API_BASE}/api/v1/sensors/live?product_id=${encodeURIComponent(pid)}`
+        : `${API_BASE}/api/v1/sensors/live`;
+      const res = await fetch(url, {
         signal: AbortSignal.timeout(4000),
         headers: { 'ngrok-skip-browser-warning': 'true' },
       });
@@ -76,6 +93,9 @@ export function LiveDataProvider({ children }: { children: ReactNode }) {
       const json: LiveDataResponse = await res.json();
 
       setDeviceConnected(Boolean(json.connected));
+      // Whether this farm's Product ID is attached to the physical device. Older
+      // backends don't send `linked`; treat a missing value as linked (compat).
+      if (typeof json.linked === 'boolean') setDeviceLinked(json.linked);
       // Reflect the pump mode the backend currently holds. Only overwrite when
       // present, so an optimistic value set by setPumpMode survives a response
       // from an older backend that doesn't report it.
