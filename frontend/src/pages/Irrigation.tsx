@@ -1,10 +1,12 @@
-import React from 'react';
-import { Power, PowerOff, Droplets, Waves, Gauge, Info, CheckCircle, Minus as MinusIcon } from 'lucide-react';
+import React, { useMemo, useState } from 'react';
+import { Power, Droplets, Waves, Gauge, Info, CheckCircle, Minus as MinusIcon } from 'lucide-react';
 import { useLiveData } from '../hooks/useLiveData';
 import { getFarmProfile, buildZones, getCropInfo } from '../lib/farm';
 import { useIsMobile } from '../hooks/useIsMobile';
 import { RELAY_ON_THRESHOLD, RELAY_OFF_THRESHOLD } from '../data/config';
 import { IrrigationZone, PumpMode } from '../types';
+import PumpControl from '../components/PumpControl';
+import FarmSettings from '../components/FarmSettings';
 
 const statusConfig: Record<IrrigationZone['status'], { color: string; bg: string; label: string }> = {
   active:    { color: 'var(--accent-primary)', bg: 'var(--accent-muted)', label: 'Watering' },
@@ -86,78 +88,13 @@ const StatCard: React.FC<{ label: string; value: string; color: string; icon: Re
   </div>
 );
 
-// The three pump modes, in the order they appear in the segmented control.
-const PUMP_MODES: { key: PumpMode; label: string; icon: React.ReactNode; color: string; muted: string }[] = [
-  { key: 'auto', label: 'Auto',     icon: <Gauge size={15} />,    color: 'var(--blue)',           muted: 'var(--blue-muted)' },
-  { key: 'on',   label: 'Pump On',  icon: <Power size={15} />,    color: 'var(--accent-primary)', muted: 'var(--accent-muted)' },
-  { key: 'off',  label: 'Pump Off', icon: <PowerOff size={15} />, color: 'var(--amber)',          muted: 'var(--amber-muted)' },
-];
-
-const PumpControl: React.FC<{
-  mode: PumpMode;
-  pumpOn: boolean | null;
-  connected: boolean;
-  onChange: (m: PumpMode) => void;
-}> = ({ mode, pumpOn, connected, onChange }) => {
-  const note =
-    mode === 'auto'
-      ? `Automatic — the device waters when soil dries to ${RELAY_ON_THRESHOLD}% and stops once it recovers to ${RELAY_OFF_THRESHOLD}%.`
-      : mode === 'on'
-        ? 'Manual override — pump forced ON, ignoring soil moisture. Switch to Auto to hand control back to the device.'
-        : 'Manual override — pump forced OFF, ignoring soil moisture. Switch to Auto to resume automatic watering.';
-
-  const reach = connected
-    ? 'Commands reach the device within about 5 seconds.'
-    : 'Device offline — this will apply as soon as it reconnects.';
-
-  return (
-    <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 'var(--radius-lg)', padding: '20px', marginBottom: '20px' }}>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '14px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <Power size={15} color="var(--accent-primary)" />
-          <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '14px', fontWeight: 700, color: 'var(--text-primary)' }}>Pump Control</h3>
-        </div>
-        <span style={{ fontSize: '11px', fontWeight: 600, color: pumpOn ? 'var(--accent-primary)' : 'var(--text-muted)' }}>
-          {pumpOn == null ? 'Pump —' : pumpOn ? 'Pump running' : 'Pump off'}
-        </span>
-      </div>
-
-      {/* Segmented AUTO / ON / OFF control */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px', marginBottom: '14px' }}>
-        {PUMP_MODES.map(pm => {
-          const active = mode === pm.key;
-          return (
-            <button
-              key={pm.key}
-              onClick={() => onChange(pm.key)}
-              aria-pressed={active}
-              style={{
-                display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px',
-                padding: '13px 8px', borderRadius: 'var(--radius-md)', cursor: 'pointer',
-                background: active ? pm.muted : 'transparent',
-                border: `1px solid ${active ? pm.color : 'var(--border-subtle)'}`,
-                color: active ? pm.color : 'var(--text-muted)',
-                fontWeight: active ? 700 : 500, fontSize: '12.5px',
-                transition: 'all 0.15s ease',
-              }}
-            >
-              {pm.icon}
-              {pm.label}
-            </button>
-          );
-        })}
-      </div>
-
-      <p style={{ fontSize: '12px', color: 'var(--text-secondary)', lineHeight: 1.55, marginBottom: '4px' }}>{note}</p>
-      <p style={{ fontSize: '11px', color: 'var(--text-muted)' }}>{reach}</p>
-    </div>
-  );
-};
-
 const Irrigation: React.FC = () => {
   const live = useLiveData();
   const isMobile = useIsMobile();
-  const profile = getFarmProfile();
+  // Re-read the saved profile whenever Farm settings edits it, so the zone titles
+  // and crop guidance below reflect a rename or crop change without a page reload.
+  const [profileVersion, setProfileVersion] = useState(0);
+  const profile = useMemo(() => getFarmProfile(), [profileVersion]);
   const crop = getCropInfo(profile?.crop);
   const zones = buildZones({ soilMoisture: live.soilMoisture, pumpStatus: live.pumpStatus, hasData: live.hasData }, profile);
 
@@ -195,7 +132,7 @@ const Irrigation: React.FC = () => {
       </div>
 
       {/* Pump control */}
-      <PumpControl mode={mode} pumpOn={pumpOn} connected={live.deviceConnected} onChange={live.setPumpMode} />
+      <PumpControl mode={mode} pumpOn={pumpOn} connected={live.deviceConnected} linked={live.deviceLinked} onChange={live.setPumpMode} />
 
       {/* How automatic control works */}
       <div style={{
@@ -233,6 +170,11 @@ const Irrigation: React.FC = () => {
       </div>
       <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(2, 1fr)', gap: '16px' }}>
         {zones.map(zone => <ZoneCard key={zone.id} zone={zone} pumpMode={mode} />)}
+      </div>
+
+      {/* Farm settings — rename the farm and edit its crops */}
+      <div style={{ marginTop: '28px' }}>
+        <FarmSettings onChange={() => setProfileVersion(v => v + 1)} />
       </div>
     </div>
   );

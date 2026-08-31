@@ -12,6 +12,7 @@ class TelemetryPayload(BaseModel):
     humidity: float
     soil_moisture: float
     water_level_cm: float
+    water_level_percent: Optional[float] = None  # the % the device shows on its TFT
     pump_status: bool
     is_charging: bool
 
@@ -25,7 +26,14 @@ class PumpCommand(BaseModel):
 async def receive_telemetry(payload: TelemetryPayload, background_tasks: BackgroundTasks):
     """Ingest one reading from the ESP32 (posted every ~5s). Stores it in memory for
     instant /live reads and persists it to Supabase in the background."""
-    reservoir_pct = store.distance_to_pct(payload.water_level_cm)
+    # Use the exact percentage the device computed and shows on its own TFT screen,
+    # so the dashboard matches the hardware readout precisely. Fall back to deriving
+    # it from the raw ultrasonic distance only for older firmware that doesn't send
+    # a percent (or a direct test call).
+    if payload.water_level_percent is not None:
+        reservoir_pct = round(max(0.0, min(100.0, payload.water_level_percent)), 1)
+    else:
+        reservoir_pct = store.distance_to_pct(payload.water_level_cm)
 
     reading = store.LiveReading(
         temperature=round(payload.temperature, 1),

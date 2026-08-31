@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React from 'react';
 import { Thermometer, Droplets, Leaf, RefreshCw } from 'lucide-react';
 import SensorCard from '../components/SensorCard';
 import IrrigationZones from '../components/IrrigationZones';
@@ -7,7 +7,7 @@ import CombinedChart from '../components/CombinedChart';
 import AIAdvisor from '../components/AIAdvisor';
 import Reservoir3D from '../components/Reservoir3D';
 import DeviceStatusBar from '../components/DeviceStatusBar';
-import CropManager from '../components/CropManager';
+import PumpControl from '../components/PumpControl';
 import { useLiveData } from '../hooks/useLiveData';
 import { getFarmProfile, buildZones, cropsLabel } from '../lib/farm';
 import { useIsMobile } from '../hooks/useIsMobile';
@@ -37,10 +37,7 @@ function toSensorData(current: number | null, unit: string, history: SensorReadi
 const Dashboard: React.FC = () => {
   const live = useLiveData();
   const isMobile = useIsMobile();
-  // Re-read the saved profile whenever the crop editor bumps this counter, so the
-  // header chip and zones below reflect crop changes without a page reload.
-  const [profileVersion, setProfileVersion] = useState(0);
-  const profile = useMemo(() => getFarmProfile(), [profileVersion]);
+  const profile = getFarmProfile();
   const cropsText = profile?.crops?.length ? cropsLabel(profile) : '';
 
   const toReadings = (key: 'temperature' | 'humidity' | 'soilMoisture'): SensorReading[] =>
@@ -108,8 +105,15 @@ const Dashboard: React.FC = () => {
         <SensorCard title="Soil Moisture" icon={<Leaf size={16} strokeWidth={2} />}       data={soilData} color="#5dea8a" delay={160} />
       </div>
 
-      {/* Crops on this farm — add or remove any time */}
-      <CropManager onChange={() => setProfileVersion(v => v + 1)} />
+      {/* Pump control — the full control also lives on the Irrigation page; shown
+          here too so the pump is always one click from the overview */}
+      <PumpControl
+        mode={live.pumpCommand ?? 'auto'}
+        pumpOn={live.pumpStatus}
+        connected={live.deviceConnected}
+        linked={live.deviceLinked}
+        onChange={live.setPumpMode}
+      />
 
       {/* Reservoir + AI */}
       <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '340px 1fr', gap: '16px', marginBottom: '20px' }}>

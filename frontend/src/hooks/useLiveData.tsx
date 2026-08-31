@@ -144,7 +144,7 @@ export function LiveDataProvider({ children }: { children: ReactNode }) {
           'Content-Type': 'application/json',
           'ngrok-skip-browser-warning': 'true',
         },
-        body: JSON.stringify({ mode }),
+        body: JSON.stringify({ mode, product_id: currentProductId() }),
         signal: AbortSignal.timeout(4000),
       });
       if (!res.ok) throw new Error('command rejected');
@@ -212,6 +212,7 @@ export function LiveDataProvider({ children }: { children: ReactNode }) {
     isCharging: liveData?.is_charging ?? null,
     hasData: liveData !== null,
     deviceConnected,
+    deviceLinked,
     lastUpdated,
     history,
     liveData,

@@ -150,6 +150,21 @@ export async function updateFarmCrops(crops: string[]): Promise<FarmProfile | nu
   return updated;
 }
 
+// Rename the farm on the saved profile. Trims the input, saves locally, and syncs
+// to the cloud — same pattern as updateFarmCrops. Ignores an all-blank name so a
+// farm can't be left nameless. Returns the updated profile, or null if there's no
+// profile to rename yet.
+export async function updateFarmName(name: string): Promise<FarmProfile | null> {
+  const current = getFarmProfile();
+  if (!current) return null;
+  const trimmed = name.trim();
+  if (!trimmed) return current;
+  const updated: FarmProfile = { ...current, farmName: trimmed };
+  saveFarmProfile(updated);
+  await upsertCloudProfile(updated);
+  return updated;
+}
+
 // ── Crop catalogue (used by onboarding + advisor) ────────────────────────────
 export interface CropInfo {
   value: string;

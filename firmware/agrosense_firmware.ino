@@ -31,10 +31,11 @@
 
 // ── Water level calibration ────────────────────────────────────
 // Distance reading (cm) from the ultrasonic sensor at each extreme.
-// 10cm = empty (0% full), 0cm = full (100% full) — adjust if you
-// reposition the sensor or use a different container.
+// 10cm = empty (0% full), 8cm = full (100% full) — the sensor faces
+// down from the top, so a full tank reads a smaller distance. Adjust
+// if you reposition the sensor or use a different container.
 #define WATER_EMPTY_CM      10.0f
-#define WATER_FULL_CM       2.0f
+#define WATER_FULL_CM       8.0f
 
 // ── Ultrasonic noise filtering ──────────────────────────────────
 // Raw single-shot ultrasonic readings are noisy. Each cycle we take

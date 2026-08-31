@@ -18,7 +18,11 @@ class LiveReading(BaseModel):
 
 
 _latest: Optional[LiveReading] = None
-_tank_height_cm: float = 10.0    # sensor-to-floor distance of an empty tank; match your hardware
+# Reservoir calibration — the ultrasonic sensor sits at the top of the tank facing
+# down, so it measures the distance to the water surface. A near-full tank reads a
+# small distance; an empty tank reads a larger one. Match these to your hardware.
+_water_empty_cm: float = 10.0   # distance the sensor reads when the tank is empty (0%)
+_water_full_cm: float = 8.0     # distance the sensor reads when the tank is full  (100%)
 
 
 def set_reading(reading: LiveReading) -> None:
@@ -38,12 +42,19 @@ def is_connected() -> bool:
     return (datetime.utcnow() - last).total_seconds() < 15
 
 
-def distance_to_pct(distance_cm: float, tank_height_cm: float = _tank_height_cm) -> float:
-    """Convert an ultrasonic distance to a reservoir percentage. The sensor sits at
-    the top facing down, so a small distance means a full tank. Clamped to 0–100."""
+def distance_to_pct(distance_cm: float,
+                    empty_cm: float = _water_empty_cm,
+                    full_cm: float = _water_full_cm) -> float:
+    """Convert an ultrasonic distance (cm to the water surface) to a reservoir
+    percentage. The sensor faces down from the top, so a small distance means a
+    full tank: `full_cm` maps to 100% and `empty_cm` to 0%. Clamped to 0–100.
+    A non-positive distance is treated as a bad reading and reported as empty."""
     if distance_cm <= 0:
         return 0.0
-    pct = ((tank_height_cm - distance_cm) / tank_height_cm) * 100
+    span = empty_cm - full_cm
+    if span <= 0:
+        return 0.0
+    pct = ((empty_cm - distance_cm) / span) * 100
     return max(0.0, min(100.0, round(pct, 1)))
 
 

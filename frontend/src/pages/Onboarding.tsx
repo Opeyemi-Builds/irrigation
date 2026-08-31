@@ -168,7 +168,7 @@ const DeviceStep: React.FC<{ onNext: (data: { farmName: string; productId: strin
       }}>
         <Cpu size={14} color="var(--accent-primary)" style={{ marginTop: '2px', flexShrink: 0 }} />
         <span style={{ fontSize: '12px', color: 'var(--text-secondary)', lineHeight: 1.5 }}>
-          Use any Product ID from <strong style={{ color: 'var(--text-primary)' }}>0001</strong> to <strong style={{ color: 'var(--text-primary)' }}>0050</strong>. Each ID is its own farm — perfect for testing with different logins.
+          Use any Product ID from <strong style={{ color: 'var(--text-primary)' }}>0001</strong> to <strong style={{ color: 'var(--text-primary)' }}>0050</strong> — each ID is its own farm. <strong style={{ color: 'var(--text-primary)' }}>0001</strong> and <strong style={{ color: 'var(--text-primary)' }}>0002</strong> are linked to the live demo device, so pick one of those to see real sensor data and control the pump.
         </span>
       </div>
 
