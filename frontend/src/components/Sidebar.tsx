@@ -185,15 +185,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activePage, onNavigate, onLogout }) =
       {/* Logo */}
       <div style={{ padding: '0 20px 28px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <div style={{
-            width: '36px', height: '36px',
-            background: 'var(--accent-primary)',
-            borderRadius: '10px',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            boxShadow: '0 0 16px var(--accent-glow)',
-          }}>
-            <Droplets size={18} color="var(--text-on-accent)" strokeWidth={2.5} />
-          </div>
+          <Logo size={36} radius={10} />
           <div>
             <div style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: '15px', color: 'var(--text-primary)', letterSpacing: '-0.3px' }}>
               AgroSense

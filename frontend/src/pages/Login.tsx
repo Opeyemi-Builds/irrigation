@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { Droplets, Eye, EyeOff, ArrowRight, ArrowLeft, Loader2 } from 'lucide-react';
+import { Eye, EyeOff, ArrowRight, ArrowLeft, Loader2 } from 'lucide-react';
 import { signIn, DEMO_EMAIL, DEMO_PASSWORD } from '../lib/auth';
 import { useIsMobile } from '../hooks/useIsMobile';
+import Logo from '../components/Logo';
 
 interface Props {
   onLogin: () => void;
@@ -87,12 +88,8 @@ const Login: React.FC<Props> = ({ onLogin, onBack, onSignUp }) => {
       }}>
         {/* Logo */}
         <div style={{ textAlign: 'center', marginBottom: '32px' }}>
-          <div style={{
-            width: '48px', height: '48px', background: 'var(--accent-primary)',
-            borderRadius: '14px', display: 'flex', alignItems: 'center', justifyContent: 'center',
-            margin: '0 auto 16px', boxShadow: '0 0 24px var(--accent-glow)',
-          }}>
-            <Droplets size={22} color="var(--text-on-accent)" strokeWidth={2.5} />
+          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '16px' }}>
+            <Logo size={48} radius={14} />
           </div>
           <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '22px', fontWeight: 800, color: 'var(--text-primary)', letterSpacing: '-0.5px', marginBottom: '6px' }}>
             Welcome back

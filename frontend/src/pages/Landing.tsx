@@ -1,6 +1,7 @@
 import React from 'react';
 import { Droplets, Thermometer, Bot, BarChart2, Waves, Gauge, ArrowRight, Wifi } from 'lucide-react';
 import { useIsMobile } from '../hooks/useIsMobile';
+import Logo from '../components/Logo';
 
 interface Props {
   onGetStarted: () => void;
@@ -76,13 +77,7 @@ const Landing: React.FC<Props> = ({ onGetStarted, onLogin }) => {
         borderBottom: '1px solid var(--border)',
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <div style={{
-            width: '32px', height: '32px', background: 'var(--accent-primary)',
-            borderRadius: '9px', display: 'flex', alignItems: 'center', justifyContent: 'center',
-            boxShadow: '0 0 16px var(--accent-glow)',
-          }}>
-            <Droplets size={16} color="var(--text-on-accent)" strokeWidth={2.5} />
-          </div>
+          <Logo size={32} radius={9} />
           <span style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: '17px', color: 'var(--text-primary)', letterSpacing: '-0.3px' }}>
             AgroSense
           </span>
@@ -330,9 +325,7 @@ const Landing: React.FC<Props> = ({ onGetStarted, onLogin }) => {
         justifyContent: 'space-between', alignItems: 'center', textAlign: 'center',
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <div style={{ width: '24px', height: '24px', background: 'var(--accent-primary)', borderRadius: '6px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <Droplets size={12} color="var(--text-on-accent)" strokeWidth={2.5} />
-          </div>
+          <Logo size={24} radius={6} glow={false} />
           <span style={{ fontFamily: 'var(--font-display)', fontSize: '14px', fontWeight: 700, color: 'var(--text-primary)' }}>AgroSense</span>
         </div>
         <div style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>
