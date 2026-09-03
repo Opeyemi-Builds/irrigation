@@ -1,12 +1,12 @@
 import React, { useMemo, useState } from 'react';
-import { Power, Droplets, Waves, Gauge, Info, CheckCircle, Minus as MinusIcon } from 'lucide-react';
+import { Power, Droplets, Waves, Gauge, Info, CheckCircle, Minus as MinusIcon, Pencil, Plus } from 'lucide-react';
 import { useLiveData } from '../hooks/useLiveData';
-import { getFarmProfile, buildZones, getCropInfo } from '../lib/farm';
+import { getFarmProfile, buildZones, getCropInfo, cropLabel, cropEmoji } from '../lib/farm';
 import { useIsMobile } from '../hooks/useIsMobile';
 import { RELAY_ON_THRESHOLD, RELAY_OFF_THRESHOLD } from '../data/config';
 import { IrrigationZone, PumpMode } from '../types';
 import PumpControl from '../components/PumpControl';
-import FarmSettings from '../components/FarmSettings';
+import FarmEditorModal from '../components/FarmEditorModal';
 
 const statusConfig: Record<IrrigationZone['status'], { color: string; bg: string; label: string }> = {
   active:    { color: 'var(--accent-primary)', bg: 'var(--accent-muted)', label: 'Watering' },
@@ -15,11 +15,12 @@ const statusConfig: Record<IrrigationZone['status'], { color: string; bg: string
   paused:    { color: 'var(--amber)',          bg: 'var(--amber-muted)',  label: 'Paused' },
 };
 
-const ZoneCard: React.FC<{ zone: IrrigationZone; pumpMode: PumpMode }> = ({ zone, pumpMode }) => {
+const ZoneCard: React.FC<{ zone: IrrigationZone; pumpMode: PumpMode; crops?: string[]; onEdit?: () => void }> = ({ zone, pumpMode, crops, onEdit }) => {
   const cfg = statusConfig[zone.status];
   const hasMoisture = zone.moisture != null;
   const m = zone.moisture ?? 0;
   const moistureColor = m < RELAY_ON_THRESHOLD ? 'var(--amber)' : m > RELAY_OFF_THRESHOLD ? 'var(--blue)' : 'var(--accent-primary)';
+  const editable = !!onEdit;
 
   // What to say about how this zone is being controlled right now.
   const controlLabel = !zone.linked
@@ -32,10 +33,19 @@ const ZoneCard: React.FC<{ zone: IrrigationZone; pumpMode: PumpMode }> = ({ zone
   const manual = zone.linked && pumpMode !== 'auto';
 
   return (
-    <div style={{
-      background: 'var(--bg-card)', border: `1px solid ${zone.linked ? 'var(--border)' : 'var(--border-subtle)'}`,
-      borderRadius: 'var(--radius-lg)', padding: '20px', opacity: zone.linked ? 1 : 0.65,
-    }}>
+    <div
+      onClick={onEdit}
+      role={editable ? 'button' : undefined}
+      tabIndex={editable ? 0 : undefined}
+      onKeyDown={editable ? (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onEdit!(); } } : undefined}
+      style={{
+        background: 'var(--bg-card)', border: `1px solid ${zone.linked ? 'var(--border)' : 'var(--border-subtle)'}`,
+        borderRadius: 'var(--radius-lg)', padding: '20px', opacity: zone.linked ? 1 : 0.65,
+        cursor: editable ? 'pointer' : 'default', transition: 'border-color 0.18s, box-shadow 0.18s',
+      }}
+      onMouseEnter={editable ? e => { const el = e.currentTarget as HTMLElement; el.style.borderColor = 'var(--accent-primary)'; el.style.boxShadow = '0 4px 18px var(--accent-glow)'; } : undefined}
+      onMouseLeave={editable ? e => { const el = e.currentTarget as HTMLElement; el.style.borderColor = 'var(--border)'; el.style.boxShadow = 'none'; } : undefined}
+    >
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '16px' }}>
         <div style={{ minWidth: 0 }}>
           <div style={{ fontSize: '14px', fontWeight: 600, color: 'var(--text-primary)', marginBottom: '3px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{zone.name}</div>
@@ -62,6 +72,29 @@ const ZoneCard: React.FC<{ zone: IrrigationZone; pumpMode: PumpMode }> = ({ zone
           )}
         </div>
       </div>
+
+      {/* Crops — only on the editable farm zone */}
+      {editable && (
+        <div style={{ marginBottom: '16px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+            <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Crops</span>
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', fontSize: '11px', fontWeight: 700, color: 'var(--accent-primary)' }}><Pencil size={11} /> Edit</span>
+          </div>
+          {crops && crops.length > 0 ? (
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+              {crops.map(v => (
+                <span key={v} style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: '999px', padding: '4px 10px', fontSize: '11.5px', fontWeight: 600, color: 'var(--text-secondary)' }}>
+                  <span style={{ fontSize: '13px' }}>{cropEmoji(v)}</span>{cropLabel(v)}
+                </span>
+              ))}
+            </div>
+          ) : (
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', border: '1px dashed var(--border)', borderRadius: 'var(--radius-sm)', padding: '10px 12px', color: 'var(--text-muted)', fontSize: '12px' }}>
+              <Plus size={13} /> Add the crops you grow
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Control mode */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'var(--bg-surface)', borderRadius: 'var(--radius-sm)', padding: '9px 12px' }}>
@@ -94,6 +127,7 @@ const Irrigation: React.FC = () => {
   // Re-read the saved profile whenever Farm settings edits it, so the zone titles
   // and crop guidance below reflect a rename or crop change without a page reload.
   const [profileVersion, setProfileVersion] = useState(0);
+  const [editorOpen, setEditorOpen] = useState(false);
   const profile = useMemo(() => getFarmProfile(), [profileVersion]);
   const crop = getCropInfo(profile?.crop);
   const zones = buildZones({ soilMoisture: live.soilMoisture, pumpStatus: live.pumpStatus, hasData: live.hasData }, profile);
@@ -165,17 +199,23 @@ const Irrigation: React.FC = () => {
       </div>
 
       {/* Zones */}
-      <div style={{ marginBottom: '12px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', marginBottom: '12px', flexWrap: 'wrap' }}>
         <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '15px', fontWeight: 700, color: 'var(--text-primary)' }}>Zones</h3>
+        <span style={{ fontSize: '12px', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '5px' }}><Pencil size={11} /> Tap your farm to name it &amp; add crops</span>
       </div>
       <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(2, 1fr)', gap: '16px' }}>
-        {zones.map(zone => <ZoneCard key={zone.id} zone={zone} pumpMode={mode} />)}
+        {zones.map((zone, i) => (
+          <ZoneCard
+            key={zone.id}
+            zone={zone}
+            pumpMode={mode}
+            crops={i === 0 ? (profile?.crops ?? []) : undefined}
+            onEdit={i === 0 ? () => setEditorOpen(true) : undefined}
+          />
+        ))}
       </div>
 
-      {/* Farm settings — rename the farm and edit its crops */}
-      <div style={{ marginTop: '28px' }}>
-        <FarmSettings onChange={() => setProfileVersion(v => v + 1)} />
-      </div>
+      <FarmEditorModal open={editorOpen} onClose={() => setEditorOpen(false)} onChange={() => setProfileVersion(v => v + 1)} />
     </div>
   );
 };

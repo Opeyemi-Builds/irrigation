@@ -234,6 +234,16 @@ export function cropLabel(value: string): string {
   return getCropInfo(value)?.label ?? value;
 }
 
+// A friendly emoji per known crop for lightweight visual flair in the UI. Custom
+// crops fall back to a generic sprout. Purely decorative — never drives logic.
+const CROP_EMOJI: Record<string, string> = {
+  maize: '🌽', tomato: '🍅', cassava: '🥔', pepper: '🌶️',
+  rice: '🌾', yam: '🍠', plantain: '🍌', soybean: '🫘',
+};
+export function cropEmoji(value: string): string {
+  return CROP_EMOJI[value] ?? '🌱';
+}
+
 // Natural-language list of every crop on the farm, e.g. "Maize, Tomato and Pepper".
 export function cropsLabel(profile: FarmProfile | null): string {
   const list = profile?.crops?.length ? profile.crops : profile?.crop ? [profile.crop] : [];
@@ -267,15 +277,10 @@ export function buildZones(live: LiveZoneInput, profile: FarmProfile | null): Ir
   const primaryName = profile?.farmName?.trim()
     ? profile.farmName.trim()
     : 'Field Zone';
-  const primaryCropLabel = profile?.crops?.length
-    ? cropLabel(profile.crops[0])
-    : profile?.crop
-    ? cropLabel(profile.crop)
-    : undefined;
 
   const primary: IrrigationZone = {
     id: 'z1',
-    name: primaryCropLabel ? `${primaryName} — ${primaryCropLabel}` : primaryName,
+    name: primaryName,
     status: live.hasData ? (live.pumpStatus ? 'active' : 'idle') : 'idle',
     moisture: live.hasData ? live.soilMoisture : null,
     lastIrrigated: null,

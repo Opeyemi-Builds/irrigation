@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 import { useLiveData } from '../hooks/useLiveData';
 import { useIsMobile } from '../hooks/useIsMobile';
+import Logo from './Logo';
 
 interface SidebarProps {
   activePage: string;
@@ -62,9 +63,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activePage, onNavigate, onLogout }) =
             <Menu size={22} />
           </button>
           <div style={{ display: 'flex', alignItems: 'center', gap: '9px' }}>
-            <div style={{ width: '30px', height: '30px', background: 'var(--accent-primary)', borderRadius: '9px', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 0 14px var(--accent-glow)' }}>
-              <Droplets size={16} color="var(--text-on-accent)" strokeWidth={2.5} />
-            </div>
+            <Logo size={30} radius={9} />
             <span style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: '16px', color: 'var(--text-primary)', letterSpacing: '-0.3px' }}>AgroSense</span>
           </div>
           <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '6px' }}>
@@ -99,9 +98,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activePage, onNavigate, onLogout }) =
           {/* Brand + close */}
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 18px 20px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-              <div style={{ width: '34px', height: '34px', background: 'var(--accent-primary)', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 0 16px var(--accent-glow)' }}>
-                <Droplets size={17} color="var(--text-on-accent)" strokeWidth={2.5} />
-              </div>
+              <Logo size={34} radius={10} />
               <div>
                 <div style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: '15px', color: 'var(--text-primary)', letterSpacing: '-0.3px' }}>AgroSense</div>
                 <div style={{ fontSize: '10px', color: 'var(--text-muted)', letterSpacing: '0.5px', textTransform: 'uppercase' }}>Smart Irrigation</div>
