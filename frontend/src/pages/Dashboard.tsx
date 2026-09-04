@@ -62,8 +62,8 @@ const Dashboard: React.FC = () => {
       {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '16px', gap: '16px', flexWrap: 'wrap' }}>
         <div>
-          <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '26px', fontWeight: 700, color: 'var(--text-primary)', letterSpacing: '-0.5px', marginBottom: '4px' }}>
-            Farm Overview
+          <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '26px', fontWeight: 700, color: '#ffffff', letterSpacing: '-0.5px', marginBottom: '4px' }}>
+            Farm <span className="serif-accent" style={{ color: 'var(--accent-primary)' }}>Overview</span>
           </h1>
           <p style={{ fontSize: '13px', color: 'var(--text-muted)' }}>
             {live.hasData && live.lastUpdated

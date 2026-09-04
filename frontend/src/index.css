@@ -33,6 +33,7 @@
 
   --font-display: 'Sora', 'Segoe UI', system-ui, -apple-system, sans-serif;
   --font-body: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+  --font-serif: 'Instrument Serif', 'Georgia', 'Times New Roman', serif;
 
   --radius-sm: 8px;
   --radius-md: 12px;
@@ -84,6 +85,16 @@ input, textarea { font-family: var(--font-body); }
 }
 
 .fade-up { animation: fadeUp 0.5s ease both; }
+
+/* ── Elegant serif accent ───────────────────────────────────────────────────
+   A fine, high-contrast italic serif for a few hero words — pairs with the
+   geometric Sora display face to add a touch of editorial style. */
+.serif-accent {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-weight: 400;
+  letter-spacing: 0;
+}
 
 /* ── Modal / overlay motion ─────────────────────────────────────────────────── */
 @keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }

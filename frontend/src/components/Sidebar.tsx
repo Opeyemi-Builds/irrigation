@@ -64,7 +64,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activePage, onNavigate, onLogout }) =
           </button>
           <div style={{ display: 'flex', alignItems: 'center', gap: '9px' }}>
             <Logo size={30} radius={9} />
-            <span style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '16px', color: 'var(--text-primary)', letterSpacing: '-0.3px' }}>AgroSense</span>
+            <span style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '16px', color: '#ffffff', letterSpacing: '-0.3px' }}>AgroSense</span>
           </div>
           <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '6px' }}>
             <span style={{ width: '7px', height: '7px', borderRadius: '50%', background: isLive ? 'var(--accent-primary)' : 'var(--text-muted)', boxShadow: isLive ? '0 0 8px var(--accent-glow)' : 'none' }} />
@@ -100,7 +100,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activePage, onNavigate, onLogout }) =
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
               <Logo size={34} radius={10} />
               <div>
-                <div style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '15px', color: 'var(--text-primary)', letterSpacing: '-0.3px' }}>AgroSense</div>
+                <div style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '15px', color: '#ffffff', letterSpacing: '-0.3px' }}>AgroSense</div>
                 <div style={{ fontSize: '10px', color: 'var(--text-muted)', letterSpacing: '0.5px', textTransform: 'uppercase' }}>Smart Irrigation</div>
               </div>
             </div>
@@ -187,7 +187,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activePage, onNavigate, onLogout }) =
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
           <Logo size={36} radius={10} />
           <div>
-            <div style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '15px', color: 'var(--text-primary)', letterSpacing: '-0.3px' }}>
+            <div style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '15px', color: '#ffffff', letterSpacing: '-0.3px' }}>
               AgroSense
             </div>
             <div style={{ fontSize: '10px', color: 'var(--text-muted)', letterSpacing: '0.5px', textTransform: 'uppercase' }}>

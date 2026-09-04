@@ -78,7 +78,7 @@ const Landing: React.FC<Props> = ({ onGetStarted, onLogin }) => {
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
           <Logo size={32} radius={9} />
-          <span style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '17px', color: 'var(--text-primary)', letterSpacing: '-0.3px' }}>
+          <span style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '17px', color: '#ffffff', letterSpacing: '-0.3px' }}>
             AgroSense
           </span>
         </div>
@@ -152,15 +152,15 @@ const Landing: React.FC<Props> = ({ onGetStarted, onLogin }) => {
         <h1 className="fade-up" style={{
           fontFamily: 'var(--font-display)',
           fontSize: isMobile ? '36px' : '64px', fontWeight: 700,
-          color: 'var(--text-primary)',
+          color: '#ffffff',
           letterSpacing: isMobile ? '-1px' : '-2px', lineHeight: 1.08,
           marginBottom: '22px',
           animationDelay: '60ms',
           maxWidth: '800px', margin: '0 auto 22px',
         }}>
-          Farm smarter.<br />
-          <span style={{ color: 'var(--accent-primary)' }}>Water less.</span><br />
-          Grow more.
+          Farm <span className="serif-accent" style={{ color: 'var(--accent-primary)' }}>smarter.</span><br />
+          Water <span className="serif-accent" style={{ color: 'var(--accent-primary)' }}>less.</span><br />
+          Grow <span className="serif-accent" style={{ color: 'var(--accent-primary)' }}>more.</span>
         </h1>
 
         <p className="fade-up" style={{
@@ -221,8 +221,8 @@ const Landing: React.FC<Props> = ({ onGetStarted, onLogin }) => {
       {/* Features */}
       <section style={{ padding: `0 ${padX} ${sectionGap}` }}>
         <div style={{ textAlign: 'center', marginBottom: isMobile ? '32px' : '48px' }}>
-          <h2 style={{ fontFamily: 'var(--font-display)', fontSize: isMobile ? '27px' : '38px', fontWeight: 700, color: 'var(--text-primary)', letterSpacing: '-1px', marginBottom: '12px' }}>
-            Everything your farm needs
+          <h2 style={{ fontFamily: 'var(--font-display)', fontSize: isMobile ? '27px' : '38px', fontWeight: 700, color: '#ffffff', letterSpacing: '-1px', marginBottom: '12px' }}>
+            Everything your farm <span className="serif-accent" style={{ color: 'var(--accent-primary)' }}>needs</span>
           </h2>
           <p style={{ fontSize: isMobile ? '15px' : '16px', color: BODY, maxWidth: '440px', margin: '0 auto', lineHeight: 1.6 }}>
             One device. One dashboard. Full visibility and control over your field conditions.
@@ -258,8 +258,8 @@ const Landing: React.FC<Props> = ({ onGetStarted, onLogin }) => {
       {/* How it works */}
       <section style={{ padding: `0 ${padX} ${sectionGap}` }}>
         <div style={{ textAlign: 'center', marginBottom: isMobile ? '32px' : '48px' }}>
-          <h2 style={{ fontFamily: 'var(--font-display)', fontSize: isMobile ? '27px' : '38px', fontWeight: 700, color: 'var(--text-primary)', letterSpacing: '-1px', marginBottom: '12px' }}>
-            Up and running in minutes
+          <h2 style={{ fontFamily: 'var(--font-display)', fontSize: isMobile ? '27px' : '38px', fontWeight: 700, color: '#ffffff', letterSpacing: '-1px', marginBottom: '12px' }}>
+            Up and running in <span className="serif-accent" style={{ color: 'var(--accent-primary)' }}>minutes</span>
           </h2>
         </div>
         <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(4, 1fr)', gap: '16px', position: 'relative' }}>
@@ -309,8 +309,8 @@ const Landing: React.FC<Props> = ({ onGetStarted, onLogin }) => {
             background: 'radial-gradient(ellipse, rgba(93,234,138,0.1) 0%, transparent 70%)',
             pointerEvents: 'none',
           }} />
-          <h2 style={{ fontFamily: 'var(--font-display)', fontSize: isMobile ? '27px' : '40px', fontWeight: 700, color: 'var(--text-primary)', letterSpacing: '-1.5px', marginBottom: '16px' }}>
-            Ready to grow smarter?
+          <h2 style={{ fontFamily: 'var(--font-display)', fontSize: isMobile ? '27px' : '40px', fontWeight: 700, color: '#ffffff', letterSpacing: '-1.5px', marginBottom: '16px' }}>
+            Ready to grow <span className="serif-accent" style={{ color: 'var(--accent-primary)' }}>smarter?</span>
           </h2>
           <p style={{ fontSize: isMobile ? '15px' : '16px', color: BODY, marginBottom: '30px', lineHeight: 1.6 }}>
             Set up your farm in minutes and connect your AgroSense device.
