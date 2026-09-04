@@ -31,8 +31,8 @@
   --text-muted: #4d6b51;
   --text-on-accent: #071009;
 
-  --font-display: 'Syne', sans-serif;
-  --font-body: 'DM Sans', sans-serif;
+  --font-display: 'Sora', 'Segoe UI', system-ui, -apple-system, sans-serif;
+  --font-body: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
 
   --radius-sm: 8px;
   --radius-md: 12px;
@@ -51,7 +51,9 @@ html, body, #root {
   font-family: var(--font-body);
   font-size: 14px;
   line-height: 1.6;
+  letter-spacing: -0.01em;
   -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
 }
 
 ::-webkit-scrollbar { width: 6px; }
@@ -95,6 +97,14 @@ input, textarea { font-family: var(--font-body); }
 @keyframes mascot-blink { 0%, 90%, 100% { transform: scaleY(1); } 95% { transform: scaleY(0.12); } }
 @keyframes mascot-drop { 0% { transform: translateY(-4px); opacity: 0; } 25% { opacity: 1; } 100% { transform: translateY(26px); opacity: 0; } }
 @keyframes mascot-glow { 0%, 100% { opacity: 0.45; } 50% { opacity: 0.9; } }
+/* 3D-feel motion: a gentle bob + tilt, with a ground shadow that breathes with it */
+@keyframes mascot-bob { 0%, 100% { transform: translateY(2px) rotate(-1.6deg); } 50% { transform: translateY(-9px) rotate(1.6deg); } }
+@keyframes mascot-shadow { 0%, 100% { transform: scaleX(1); opacity: 0.4; } 50% { transform: scaleX(0.8); opacity: 0.24; } }
+@keyframes mascot-wave { 0%, 55%, 100% { transform: rotate(6deg); } 65% { transform: rotate(-16deg); } 78% { transform: rotate(6deg); } 88% { transform: rotate(-9deg); } }
+
+/* ── Guided tour ────────────────────────────────────────────────────────────── */
+@keyframes tour-in { from { opacity: 0; transform: translateY(10px) scale(0.98); } to { opacity: 1; transform: translateY(0) scale(1); } }
+@keyframes tour-ring { 0%, 100% { box-shadow: 0 0 0 9999px rgba(6,11,8,0.66), 0 0 0 2px var(--accent-primary), 0 0 22px 3px var(--accent-glow); } 50% { box-shadow: 0 0 0 9999px rgba(6,11,8,0.66), 0 0 0 3px var(--accent-primary), 0 0 34px 8px var(--accent-glow); } }
 
 /* ── Mobile niceties ────────────────────────────────────────────────────────── */
 * { -webkit-tap-highlight-color: transparent; }

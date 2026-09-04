@@ -287,7 +287,7 @@ const Reservoir3D: React.FC<Props> = ({
             <div style={{ fontSize: '10px', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '4px' }}>Water Level</div>
             <div style={{
               fontFamily: 'var(--font-display)',
-              fontSize: '36px', fontWeight: 800,
+              fontSize: '36px', fontWeight: 700,
               letterSpacing: '-1px', lineHeight: 1,
               color: hasData ? levelColor : 'var(--text-muted)',
               transition: 'color 1s ease',

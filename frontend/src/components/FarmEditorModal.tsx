@@ -105,7 +105,7 @@ const FarmEditorModal: React.FC<Props> = ({ open, onClose, onChange }) => {
               <Leaf size={19} color="var(--accent-primary)" />
             </div>
             <div style={{ minWidth: 0 }}>
-              <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '18px', fontWeight: 800, color: 'var(--text-primary)', letterSpacing: '-0.3px' }}>Your Farm</h2>
+              <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '18px', fontWeight: 700, color: 'var(--text-primary)', letterSpacing: '-0.3px' }}>Your Farm</h2>
               <p style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Name your farm and pick everything you grow</p>
             </div>
           </div>

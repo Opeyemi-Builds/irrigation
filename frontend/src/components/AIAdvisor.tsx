@@ -1,9 +1,10 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Send, Bot, User, Loader, Sparkles } from 'lucide-react';
+import { Send, Bot, User, Loader } from 'lucide-react';
 import { AIMessage } from '../types';
 import { useLiveData } from '../hooks/useLiveData';
 import { getFarmProfile } from '../lib/farm';
 import { getAdvisorReply, ADVISOR_SUGGESTIONS, AdvisorContext } from '../lib/advisor';
+import Mascot from './Mascot';
 
 const SUGGESTIONS = ADVISOR_SUGGESTIONS.slice(0, 4);
 
@@ -92,11 +93,11 @@ const AIAdvisor: React.FC = () => {
       height: '520px',
     }}>
       <div style={{ padding: '16px 20px', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', gap: '10px' }}>
-        <div style={{ width: '34px', height: '34px', background: 'var(--accent-muted)', border: '1px solid var(--accent-glow)', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <Sparkles size={15} color="var(--accent-primary)" />
+        <div style={{ width: '38px', height: '38px', background: 'var(--accent-muted)', border: '1px solid var(--accent-glow)', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, overflow: 'hidden' }}>
+          <Mascot size={40} variant="head" />
         </div>
         <div>
-          <div style={{ fontFamily: 'var(--font-display)', fontSize: '14px', fontWeight: 700, color: 'var(--text-primary)' }}>AI Farm Advisor</div>
+          <div style={{ fontFamily: 'var(--font-display)', fontSize: '14px', fontWeight: 700, color: 'var(--text-primary)' }}>Sprout · AI Advisor</div>
           <div style={{ fontSize: '11px', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '4px' }}>
             <div style={{ width: '5px', height: '5px', borderRadius: '50%', background: live.hasData ? 'var(--accent-primary)' : 'var(--text-muted)', animation: live.hasData ? 'pulse-dot 2s ease infinite' : 'none' }} />
             {live.hasData ? 'Reading your live sensors' : 'Ready — waiting for device'}

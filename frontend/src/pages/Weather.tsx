@@ -13,7 +13,7 @@ const ConditionCard: React.FC<{ icon: React.ReactNode; label: string; value: str
       </div>
       <span style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>{label}</span>
     </div>
-    <div style={{ fontFamily: 'var(--font-display)', fontSize: '32px', fontWeight: 800, color: value === '—' ? 'var(--text-muted)' : 'var(--text-primary)', letterSpacing: '-1px' }}>
+    <div style={{ fontFamily: 'var(--font-display)', fontSize: '32px', fontWeight: 700, color: value === '—' ? 'var(--text-muted)' : 'var(--text-primary)', letterSpacing: '-1px' }}>
       {value}
     </div>
   </div>
@@ -29,7 +29,7 @@ const Weather: React.FC = () => {
     <div style={{ padding: isMobile ? '18px 16px 32px' : '28px 32px', overflowY: 'auto', height: isMobile ? 'auto' : '100vh', minHeight: isMobile ? '100%' : undefined }}>
       {/* Header */}
       <div style={{ marginBottom: '24px' }}>
-        <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '26px', fontWeight: 800, color: 'var(--text-primary)', letterSpacing: '-0.5px', marginBottom: '4px' }}>
+        <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '26px', fontWeight: 700, color: 'var(--text-primary)', letterSpacing: '-0.5px', marginBottom: '4px' }}>
           Weather
         </h1>
         <p style={{ fontSize: '13px', color: 'var(--text-muted)' }}>

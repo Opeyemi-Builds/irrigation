@@ -479,7 +479,7 @@ const Onboarding: React.FC<Props> = ({ onComplete, onBack }) => {
           <StepIndicator current={step} />
 
           <div style={{ marginBottom: '24px' }}>
-            <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '20px', fontWeight: 800, color: 'var(--text-primary)', letterSpacing: '-0.4px', marginBottom: '6px' }}>
+            <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '20px', fontWeight: 700, color: 'var(--text-primary)', letterSpacing: '-0.4px', marginBottom: '6px' }}>
               {titles[step].title}
             </h2>
             <p style={{ fontSize: '13px', color: 'var(--text-muted)', lineHeight: 1.5 }}>{titles[step].sub}</p>

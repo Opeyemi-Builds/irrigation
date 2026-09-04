@@ -122,7 +122,7 @@ const FieldMap: React.FC<Props> = ({ zones }) => {
           </div>
         </div>
         <div style={{ textAlign: 'right' }}>
-          <div style={{ fontFamily: 'var(--font-display)', fontSize: '22px', fontWeight: 800, color: healthColor, letterSpacing: '-0.5px', lineHeight: 1 }}>
+          <div style={{ fontFamily: 'var(--font-display)', fontSize: '22px', fontWeight: 700, color: healthColor, letterSpacing: '-0.5px', lineHeight: 1 }}>
             {overallHealth == null ? '—' : `${overallHealth}%`}
           </div>
           <div style={{ fontSize: '10px', color: 'var(--text-muted)', marginTop: '2px' }}>avg moisture</div>

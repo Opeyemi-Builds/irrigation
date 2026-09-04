@@ -62,7 +62,7 @@ const Dashboard: React.FC = () => {
       {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '16px', gap: '16px', flexWrap: 'wrap' }}>
         <div>
-          <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '26px', fontWeight: 800, color: 'var(--text-primary)', letterSpacing: '-0.5px', marginBottom: '4px' }}>
+          <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '26px', fontWeight: 700, color: 'var(--text-primary)', letterSpacing: '-0.5px', marginBottom: '4px' }}>
             Farm Overview
           </h1>
           <p style={{ fontSize: '13px', color: 'var(--text-muted)' }}>
@@ -73,7 +73,7 @@ const Dashboard: React.FC = () => {
         </div>
         <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
           {profile && (
-            <div style={{ background: 'var(--accent-muted)', border: '1px solid var(--accent-glow)', borderRadius: 'var(--radius-sm)', padding: '6px 14px', fontSize: '12px', color: 'var(--accent-primary)', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <div data-tour="farm" style={{ background: 'var(--accent-muted)', border: '1px solid var(--accent-glow)', borderRadius: 'var(--radius-sm)', padding: '6px 14px', fontSize: '12px', color: 'var(--accent-primary)', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '6px' }}>
               <Leaf size={13} />
               {profile.farmName?.trim() || 'My Farm'}{cropsText ? ` · ${cropsText}` : ''}
             </div>
@@ -99,7 +99,7 @@ const Dashboard: React.FC = () => {
       />
 
       {/* Sensor cards */}
-      <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(3, 1fr)', gap: '16px', marginBottom: '20px' }}>
+      <div data-tour="sensors" style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(3, 1fr)', gap: '16px', marginBottom: '20px' }}>
         <SensorCard title="Temperature"   icon={<Thermometer size={16} strokeWidth={2} />} data={tempData} color="#ff7c5e" delay={0} />
         <SensorCard title="Humidity"      icon={<Droplets size={16} strokeWidth={2} />}   data={humData}  color="#5bbfef" delay={80} />
         <SensorCard title="Soil Moisture" icon={<Leaf size={16} strokeWidth={2} />}       data={soilData} color="#5dea8a" delay={160} />
@@ -107,18 +107,22 @@ const Dashboard: React.FC = () => {
 
       {/* Pump control — the full control also lives on the Irrigation page; shown
           here too so the pump is always one click from the overview */}
-      <PumpControl
-        mode={live.pumpCommand ?? 'auto'}
-        pumpOn={live.pumpStatus}
-        connected={live.deviceConnected}
-        linked={live.deviceLinked}
-        onChange={live.setPumpMode}
-      />
+      <div data-tour="pump">
+        <PumpControl
+          mode={live.pumpCommand ?? 'auto'}
+          pumpOn={live.pumpStatus}
+          connected={live.deviceConnected}
+          linked={live.deviceLinked}
+          onChange={live.setPumpMode}
+        />
+      </div>
 
       {/* Reservoir + AI */}
       <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '340px 1fr', gap: '16px', marginBottom: '20px' }}>
         <Reservoir3D level={live.reservoirPct} status={reservoirStatus} />
-        <AIAdvisor />
+        <div data-tour="advisor" style={{ minWidth: 0 }}>
+          <AIAdvisor />
+        </div>
       </div>
 
       {/* Chart */}

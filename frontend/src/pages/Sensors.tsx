@@ -67,7 +67,7 @@ const Sensors: React.FC = () => {
     <div style={{ padding: isMobile ? '18px 16px 32px' : '28px 32px', overflowY: 'auto', height: isMobile ? 'auto' : '100vh', minHeight: isMobile ? '100%' : undefined }}>
       {/* Header */}
       <div style={{ marginBottom: '24px' }}>
-        <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '26px', fontWeight: 800, color: 'var(--text-primary)', letterSpacing: '-0.5px', marginBottom: '4px' }}>
+        <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '26px', fontWeight: 700, color: 'var(--text-primary)', letterSpacing: '-0.5px', marginBottom: '4px' }}>
           Sensors
         </h1>
         <p style={{ fontSize: '13px', color: 'var(--text-muted)' }}>
@@ -108,7 +108,7 @@ const Sensors: React.FC = () => {
             Current Reading
           </div>
           <div style={{ display: 'flex', alignItems: 'flex-end', gap: '8px' }}>
-            <span style={{ fontFamily: 'var(--font-display)', fontSize: '64px', fontWeight: 800, color: current != null ? sensor.color : 'var(--text-muted)', lineHeight: 1, letterSpacing: '-2px' }}>
+            <span style={{ fontFamily: 'var(--font-display)', fontSize: '64px', fontWeight: 700, color: current != null ? sensor.color : 'var(--text-muted)', lineHeight: 1, letterSpacing: '-2px' }}>
               {current != null ? current : '—'}
             </span>
             {current != null && <span style={{ fontSize: '24px', color: 'var(--text-secondary)', marginBottom: '8px' }}>{sensor.unit}</span>}

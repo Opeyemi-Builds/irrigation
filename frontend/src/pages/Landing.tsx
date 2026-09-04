@@ -78,7 +78,7 @@ const Landing: React.FC<Props> = ({ onGetStarted, onLogin }) => {
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
           <Logo size={32} radius={9} />
-          <span style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: '17px', color: 'var(--text-primary)', letterSpacing: '-0.3px' }}>
+          <span style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '17px', color: 'var(--text-primary)', letterSpacing: '-0.3px' }}>
             AgroSense
           </span>
         </div>
@@ -112,19 +112,31 @@ const Landing: React.FC<Props> = ({ onGetStarted, onLogin }) => {
 
       {/* Hero */}
       <section style={{
-        padding: isMobile ? '56px 20px 48px' : '100px 48px 80px',
+        padding: isMobile ? '72px 20px 56px' : '116px 48px 92px',
         textAlign: 'center',
         position: 'relative',
         overflow: 'hidden',
       }}>
+        {/* Real-world hero photo — a farmer checking the field. Drop the image at
+            frontend/public/hero-farm.jpg. The dark gradient (painted on top of
+            the photo) keeps the copy readable, and if the file is ever missing the
+            gradient alone still fades cleanly into the page. */}
+        <div style={{
+          position: 'absolute', inset: 0, zIndex: 0,
+          backgroundImage: 'linear-gradient(180deg, rgba(8,13,10,0.62) 0%, rgba(8,13,10,0.80) 55%, var(--bg-base) 100%), url(/hero-farm.jpg)',
+          backgroundSize: 'cover', backgroundPosition: 'center', backgroundRepeat: 'no-repeat',
+          pointerEvents: 'none',
+        }} />
+
         {/* Glow orb */}
         <div style={{
           position: 'absolute', top: '20%', left: '50%', transform: 'translateX(-50%)',
           width: '600px', maxWidth: '95vw', height: '300px',
-          background: 'radial-gradient(ellipse, rgba(93,234,138,0.07) 0%, transparent 70%)',
-          pointerEvents: 'none',
+          background: 'radial-gradient(ellipse, rgba(93,234,138,0.10) 0%, transparent 70%)',
+          pointerEvents: 'none', zIndex: 1,
         }} />
 
+        <div style={{ position: 'relative', zIndex: 2 }}>
         <div className="fade-up" style={{
           display: 'inline-flex', alignItems: 'center', gap: '7px',
           background: 'var(--accent-muted)', border: '1px solid rgba(93,234,138,0.2)',
@@ -139,7 +151,7 @@ const Landing: React.FC<Props> = ({ onGetStarted, onLogin }) => {
 
         <h1 className="fade-up" style={{
           fontFamily: 'var(--font-display)',
-          fontSize: isMobile ? '36px' : '64px', fontWeight: 800,
+          fontSize: isMobile ? '36px' : '64px', fontWeight: 700,
           color: 'var(--text-primary)',
           letterSpacing: isMobile ? '-1px' : '-2px', lineHeight: 1.08,
           marginBottom: '22px',
@@ -186,6 +198,7 @@ const Landing: React.FC<Props> = ({ onGetStarted, onLogin }) => {
             Sign In
           </button>
         </div>
+        </div>
       </section>
 
       {/* Stats bar */}
@@ -199,7 +212,7 @@ const Landing: React.FC<Props> = ({ onGetStarted, onLogin }) => {
       }}>
         {stats.map(s => (
           <div key={s.label}>
-            <div style={{ fontFamily: 'var(--font-display)', fontSize: isMobile ? '30px' : '38px', fontWeight: 800, color: 'var(--accent-primary)', letterSpacing: '-1px', marginBottom: '4px' }}>{s.value}</div>
+            <div style={{ fontFamily: 'var(--font-display)', fontSize: isMobile ? '30px' : '38px', fontWeight: 700, color: 'var(--accent-primary)', letterSpacing: '-1px', marginBottom: '4px' }}>{s.value}</div>
             <div style={{ fontSize: '13px', color: BODY, textTransform: 'uppercase', letterSpacing: '0.5px', fontWeight: 600 }}>{s.label}</div>
           </div>
         ))}
@@ -208,7 +221,7 @@ const Landing: React.FC<Props> = ({ onGetStarted, onLogin }) => {
       {/* Features */}
       <section style={{ padding: `0 ${padX} ${sectionGap}` }}>
         <div style={{ textAlign: 'center', marginBottom: isMobile ? '32px' : '48px' }}>
-          <h2 style={{ fontFamily: 'var(--font-display)', fontSize: isMobile ? '27px' : '38px', fontWeight: 800, color: 'var(--text-primary)', letterSpacing: '-1px', marginBottom: '12px' }}>
+          <h2 style={{ fontFamily: 'var(--font-display)', fontSize: isMobile ? '27px' : '38px', fontWeight: 700, color: 'var(--text-primary)', letterSpacing: '-1px', marginBottom: '12px' }}>
             Everything your farm needs
           </h2>
           <p style={{ fontSize: isMobile ? '15px' : '16px', color: BODY, maxWidth: '440px', margin: '0 auto', lineHeight: 1.6 }}>
@@ -245,7 +258,7 @@ const Landing: React.FC<Props> = ({ onGetStarted, onLogin }) => {
       {/* How it works */}
       <section style={{ padding: `0 ${padX} ${sectionGap}` }}>
         <div style={{ textAlign: 'center', marginBottom: isMobile ? '32px' : '48px' }}>
-          <h2 style={{ fontFamily: 'var(--font-display)', fontSize: isMobile ? '27px' : '38px', fontWeight: 800, color: 'var(--text-primary)', letterSpacing: '-1px', marginBottom: '12px' }}>
+          <h2 style={{ fontFamily: 'var(--font-display)', fontSize: isMobile ? '27px' : '38px', fontWeight: 700, color: 'var(--text-primary)', letterSpacing: '-1px', marginBottom: '12px' }}>
             Up and running in minutes
           </h2>
         </div>
@@ -262,7 +275,7 @@ const Landing: React.FC<Props> = ({ onGetStarted, onLogin }) => {
               position: 'relative',
             }}>
               <div style={{
-                fontFamily: 'var(--font-display)', fontSize: '48px', fontWeight: 800,
+                fontFamily: 'var(--font-display)', fontSize: '48px', fontWeight: 700,
                 color: 'var(--accent-primary)', opacity: 0.15,
                 position: 'absolute', top: '12px', right: '16px',
                 lineHeight: 1, letterSpacing: '-2px',
@@ -296,7 +309,7 @@ const Landing: React.FC<Props> = ({ onGetStarted, onLogin }) => {
             background: 'radial-gradient(ellipse, rgba(93,234,138,0.1) 0%, transparent 70%)',
             pointerEvents: 'none',
           }} />
-          <h2 style={{ fontFamily: 'var(--font-display)', fontSize: isMobile ? '27px' : '40px', fontWeight: 800, color: 'var(--text-primary)', letterSpacing: '-1.5px', marginBottom: '16px' }}>
+          <h2 style={{ fontFamily: 'var(--font-display)', fontSize: isMobile ? '27px' : '40px', fontWeight: 700, color: 'var(--text-primary)', letterSpacing: '-1.5px', marginBottom: '16px' }}>
             Ready to grow smarter?
           </h2>
           <p style={{ fontSize: isMobile ? '15px' : '16px', color: BODY, marginBottom: '30px', lineHeight: 1.6 }}>

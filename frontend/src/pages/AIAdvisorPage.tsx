@@ -1,10 +1,11 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Send, Bot, User, Loader, Sparkles, Thermometer, Droplets, Leaf, Power, Waves, RefreshCw, BookOpen } from 'lucide-react';
+import { Send, Bot, User, Loader, Thermometer, Droplets, Leaf, Power, Waves, RefreshCw, BookOpen } from 'lucide-react';
 import { AIMessage } from '../types';
 import { useLiveData } from '../hooks/useLiveData';
 import { getFarmProfile, describeProfile, buildZones } from '../lib/farm';
 import { getAdvisorReply, ADVISOR_SUGGESTIONS, AdvisorContext } from '../lib/advisor';
 import { useIsMobile } from '../hooks/useIsMobile';
+import Mascot from '../components/Mascot';
 
 const zoneStatusColor: Record<string, { bg: string; color: string }> = {
   active:    { bg: 'var(--accent-muted)', color: 'var(--accent-primary)' },
@@ -197,11 +198,11 @@ const AIAdvisorPage: React.FC = () => {
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
         {/* Chat header */}
         <div style={{ padding: isMobile ? '14px 16px' : '20px 28px', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', gap: '12px', background: 'var(--bg-surface)' }}>
-          <div style={{ width: '38px', height: '38px', background: 'var(--accent-muted)', border: '1px solid var(--accent-glow)', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <Sparkles size={16} color="var(--accent-primary)" />
+          <div style={{ width: '44px', height: '44px', background: 'var(--accent-muted)', border: '1px solid var(--accent-glow)', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, overflow: 'hidden' }}>
+            <Mascot size={48} variant="head" />
           </div>
           <div>
-            <div style={{ fontFamily: 'var(--font-display)', fontSize: '15px', fontWeight: 700, color: 'var(--text-primary)' }}>AI Farm Advisor</div>
+            <div style={{ fontFamily: 'var(--font-display)', fontSize: '15px', fontWeight: 700, color: 'var(--text-primary)' }}>Sprout · AI Farm Advisor</div>
             <div style={{ fontSize: '11px', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '5px' }}>
               <div style={{ width: '5px', height: '5px', borderRadius: '50%', background: live.hasData ? 'var(--accent-primary)' : 'var(--text-muted)', animation: live.hasData ? 'pulse-dot 2s infinite' : 'none' }} />
               {live.hasData ? 'Reading your live sensors' : 'Ready — waiting for device'}

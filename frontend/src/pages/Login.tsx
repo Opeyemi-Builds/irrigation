@@ -91,7 +91,7 @@ const Login: React.FC<Props> = ({ onLogin, onBack, onSignUp }) => {
           <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '16px' }}>
             <Logo size={48} radius={14} />
           </div>
-          <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '22px', fontWeight: 800, color: 'var(--text-primary)', letterSpacing: '-0.5px', marginBottom: '6px' }}>
+          <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '22px', fontWeight: 700, color: 'var(--text-primary)', letterSpacing: '-0.5px', marginBottom: '6px' }}>
             Welcome back
           </h1>
           <p style={{ fontSize: '13px', color: 'var(--text-muted)' }}>Sign in to your AgroSense account</p>

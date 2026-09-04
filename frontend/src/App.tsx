@@ -8,12 +8,54 @@ import AIAdvisorPage from './pages/AIAdvisorPage';
 import Landing from './pages/Landing';
 import Login from './pages/Login';
 import Onboarding from './pages/Onboarding';
+import Tour, { TourStep } from './components/Tour';
 import { LiveDataProvider } from './hooks/useLiveData';
 import { useIsMobile } from './hooks/useIsMobile';
 import { supabase, signOut, hasAppSession, getSessionEmail, DEMO_EMAIL } from './lib/auth';
 import { getFarmProfile, hydrateFarmProfileFromCloud } from './lib/farm';
 
 type AppView = 'landing' | 'login' | 'onboarding' | 'app';
+
+// One-time guided tour shown on the dashboard right after a user sets up their
+// farm. Steps that point at an element are skipped automatically when that
+// element isn't on screen (e.g. the nav lives in a drawer on mobile).
+const TOUR_STEPS: TourStep[] = [
+  {
+    mascot: true,
+    title: 'Welcome to AgroSense!',
+    body: "I'm Sprout, your farm advisor. Here's a quick 20-second tour of your new dashboard — skip it any time.",
+  },
+  {
+    selector: '[data-tour="nav"]',
+    title: 'Get around',
+    body: 'Jump between your dashboard, sensors, irrigation, weather and the full AI advisor from here.',
+  },
+  {
+    selector: '[data-tour="farm"]',
+    title: 'Your farm',
+    body: 'This is the farm and crops you just set up. Head to Irrigation to open your field and add more crops.',
+  },
+  {
+    selector: '[data-tour="sensors"]',
+    title: 'Live readings',
+    body: 'Temperature, humidity and soil moisture stream straight from your device — each scored against a healthy range.',
+  },
+  {
+    selector: '[data-tour="pump"]',
+    title: 'Your pump',
+    body: 'Leave it on Auto to water from live soil moisture, or take manual control whenever you like.',
+  },
+  {
+    selector: '[data-tour="advisor"]',
+    title: 'Ask me anything',
+    body: 'I read your live sensors and crops to answer questions and tell you exactly when — and how much — to water.',
+  },
+  {
+    mascot: true,
+    title: "You're all set!",
+    body: "That's the tour. Your field is live now — explore around, and tap me whenever you need a hand. 🌱",
+  },
+];
 
 const App: React.FC = () => {
   const isMobile = useIsMobile();
@@ -110,6 +152,7 @@ const App: React.FC = () => {
           {renderPage()}
         </main>
       </div>
+      <Tour steps={TOUR_STEPS} run={activePage === 'dashboard'} storageKey="agrosense.tourSeen" />
     </LiveDataProvider>
   );
 };
