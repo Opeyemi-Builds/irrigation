@@ -166,7 +166,7 @@ const Tour: React.FC<Props> = ({ steps, run, storageKey, onClose }) => {
     <>
       {/* Click-catcher. For centred cards it also supplies the dim; spotlight
           cards get their dim from the ring's huge box-shadow instead. */}
-      <div style={{ position: 'fixed', inset: 0, zIndex: 10000, background: centered ? 'rgba(6,11,8,0.72)' : 'transparent' }} />
+      <div style={{ position: 'fixed', inset: 0, zIndex: 10000, background: centered ? 'rgba(8,22,14,0.45)' : 'transparent' }} />
 
       {/* Spotlight ring */}
       {!centered && box && (

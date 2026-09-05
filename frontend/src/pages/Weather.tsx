@@ -29,7 +29,7 @@ const Weather: React.FC = () => {
     <div style={{ padding: isMobile ? '18px 16px 32px' : '28px 32px', overflowY: 'auto', height: isMobile ? 'auto' : '100vh', minHeight: isMobile ? '100%' : undefined }}>
       {/* Header */}
       <div style={{ marginBottom: '24px' }}>
-        <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '26px', fontWeight: 700, color: '#ffffff', letterSpacing: '-0.5px', marginBottom: '4px' }}>
+        <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '26px', fontWeight: 700, color: 'var(--text-primary)', letterSpacing: '-0.5px', marginBottom: '4px' }}>
           Weather
         </h1>
         <p style={{ fontSize: '13px', color: 'var(--text-muted)' }}>

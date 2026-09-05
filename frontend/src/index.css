@@ -5,31 +5,34 @@
 }
 
 :root {
-  --bg-base: #0a0f0d;
-  --bg-surface: #111a14;
-  --bg-card: #162019;
-  --bg-card-hover: #1c2a1f;
-  --bg-elevated: #1e2d21;
+  /* Light, white-dominant theme. White is the primary surface; green is the
+     accent. Cards sit as pure white on a barely-green off-white canvas so they
+     read as clean, floating panels. */
+  --bg-base: #f5f9f6;      /* app canvas — near-white with a hint of green */
+  --bg-surface: #ffffff;   /* sidebar / nav / panels — pure white */
+  --bg-card: #ffffff;      /* cards — pure white */
+  --bg-card-hover: #f0f7f2;
+  --bg-elevated: #eef4ef;
 
-  --border: #2a3d2d;
-  --border-subtle: #1e2d21;
+  --border: #dde8e0;
+  --border-subtle: #eaf1ec;
 
-  --accent-primary: #5dea8a;
-  --accent-secondary: #3db86a;
-  --accent-muted: rgba(93, 234, 138, 0.12);
-  --accent-glow: rgba(93, 234, 138, 0.25);
+  --accent-primary: #16a34a;   /* readable green on white; button bg w/ white text */
+  --accent-secondary: #0f8a3f;
+  --accent-muted: rgba(22, 163, 74, 0.10);
+  --accent-glow: rgba(22, 163, 74, 0.20);
 
-  --amber: #f5a623;
-  --amber-muted: rgba(245, 166, 35, 0.12);
-  --red: #ff5e5e;
-  --red-muted: rgba(255, 94, 94, 0.12);
-  --blue: #5bbfef;
-  --blue-muted: rgba(91, 191, 239, 0.12);
+  --amber: #b7791f;
+  --amber-muted: rgba(183, 121, 31, 0.12);
+  --red: #dc2626;
+  --red-muted: rgba(220, 38, 38, 0.10);
+  --blue: #1e88c7;
+  --blue-muted: rgba(30, 136, 199, 0.12);
 
-  --text-primary: #e8f5eb;
-  --text-secondary: #8aab8e;
-  --text-muted: #4d6b51;
-  --text-on-accent: #071009;
+  --text-primary: #0f1f16;   /* near-black, faint green */
+  --text-secondary: #4b6154; /* muted green-gray, readable on white */
+  --text-muted: #6f8a78;     /* soft sage for small/secondary labels */
+  --text-on-accent: #ffffff; /* text on green buttons/badges */
 
   --font-display: 'Sora', 'Segoe UI', system-ui, -apple-system, sans-serif;
   --font-body: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
@@ -40,8 +43,8 @@
   --radius-lg: 16px;
   --radius-xl: 24px;
 
-  --shadow-card: 0 1px 3px rgba(0,0,0,0.4), 0 0 0 1px var(--border);
-  --shadow-elevated: 0 8px 32px rgba(0,0,0,0.5), 0 0 0 1px var(--border);
+  --shadow-card: 0 1px 3px rgba(16,38,24,0.07), 0 0 0 1px var(--border);
+  --shadow-elevated: 0 14px 40px rgba(16,38,24,0.12), 0 0 0 1px var(--border);
   --shadow-glow: 0 0 24px var(--accent-glow);
 }
 
@@ -115,7 +118,7 @@ input, textarea { font-family: var(--font-body); }
 
 /* ── Guided tour ────────────────────────────────────────────────────────────── */
 @keyframes tour-in { from { opacity: 0; transform: translateY(10px) scale(0.98); } to { opacity: 1; transform: translateY(0) scale(1); } }
-@keyframes tour-ring { 0%, 100% { box-shadow: 0 0 0 9999px rgba(6,11,8,0.66), 0 0 0 2px var(--accent-primary), 0 0 22px 3px var(--accent-glow); } 50% { box-shadow: 0 0 0 9999px rgba(6,11,8,0.66), 0 0 0 3px var(--accent-primary), 0 0 34px 8px var(--accent-glow); } }
+@keyframes tour-ring { 0%, 100% { box-shadow: 0 0 0 9999px rgba(8,22,14,0.45), 0 0 0 2px var(--accent-primary), 0 0 22px 3px var(--accent-glow); } 50% { box-shadow: 0 0 0 9999px rgba(8,22,14,0.45), 0 0 0 3px var(--accent-primary), 0 0 34px 8px var(--accent-glow); } }
 
 /* ── Mobile niceties ────────────────────────────────────────────────────────── */
 * { -webkit-tap-highlight-color: transparent; }

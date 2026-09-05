@@ -90,7 +90,7 @@ const FarmEditorModal: React.FC<Props> = ({ open, onClose, onChange }) => {
           background: 'var(--bg-card)', border: '1px solid var(--border)',
           borderRadius: isMobile ? '20px 20px 0 0' : 'var(--radius-lg)',
           width: '100%', maxWidth: '620px', maxHeight: isMobile ? '92vh' : '88vh',
-          overflowY: 'auto', boxShadow: '0 24px 70px rgba(0,0,0,0.5)',
+          overflowY: 'auto', boxShadow: '0 24px 70px rgba(16,38,24,0.28)',
           animation: isMobile ? 'slide-up 0.28s cubic-bezier(0.4,0,0.2,1)' : 'pop-in 0.24s cubic-bezier(0.34,1.56,0.64,1)',
         }}
       >
@@ -203,7 +203,7 @@ const FarmEditorModal: React.FC<Props> = ({ open, onClose, onChange }) => {
                   <span key={v} style={{ display: 'inline-flex', alignItems: 'center', gap: '7px', background: 'var(--accent-muted)', border: '1px solid var(--accent-glow)', borderRadius: '999px', padding: '6px 8px 6px 12px', fontSize: '13px', fontWeight: 600, color: 'var(--accent-primary)' }}>
                     <span>{cropEmoji(v)}</span>
                     {cropLabel(v)}
-                    <button onClick={() => removeCrop(v)} aria-label={`Remove ${cropLabel(v)}`} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(0,0,0,0.25)', border: 'none', cursor: 'pointer', color: 'var(--accent-primary)', padding: 0 }}>
+                    <button onClick={() => removeCrop(v)} aria-label={`Remove ${cropLabel(v)}`} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '18px', height: '18px', borderRadius: '50%', background: 'var(--accent-muted)', border: 'none', cursor: 'pointer', color: 'var(--accent-primary)', padding: 0 }}>
                       <X size={11} strokeWidth={3} />
                     </button>
                   </span>

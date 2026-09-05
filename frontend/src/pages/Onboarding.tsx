@@ -311,7 +311,7 @@ const CropStep: React.FC<{ onSubmit: (data: { crops: string[]; stage: string; so
                 <button onClick={() => removeCrop(v)} aria-label={`Remove ${cropLabel(v)}`} style={{
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                   width: '16px', height: '16px', borderRadius: '50%',
-                  background: 'rgba(0,0,0,0.25)', border: 'none', cursor: 'pointer', color: 'var(--accent-primary)', padding: 0,
+                  background: 'var(--accent-muted)', border: 'none', cursor: 'pointer', color: 'var(--accent-primary)', padding: 0,
                 }}>
                   <X size={10} strokeWidth={3} />
                 </button>
@@ -465,7 +465,7 @@ const Onboarding: React.FC<Props> = ({ onComplete, onBack }) => {
         {/* Avatar / brand panel */}
         <div style={{
           flex: isMobile ? 'none' : '0 0 320px',
-          background: 'linear-gradient(160deg, #132019 0%, #0d1a12 100%)',
+          background: 'linear-gradient(160deg, #eafaf0 0%, #d6f0e1 100%)',
           borderRight: isMobile ? 'none' : '1px solid var(--border)',
           borderBottom: isMobile ? '1px solid var(--border)' : 'none',
           padding: isMobile ? '24px' : '40px 28px',

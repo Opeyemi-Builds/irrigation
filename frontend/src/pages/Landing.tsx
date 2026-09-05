@@ -54,9 +54,9 @@ const stats = [
   { value: 'AI', label: 'Built-in advisor' },
 ];
 
-// High-contrast body copy — noticeably brighter than --text-secondary so the
-// page stays comfortable to read for every visitor, including older eyes.
-const BODY = '#c3d8c7';
+// Body copy color — a readable dark green-gray that sits comfortably on the
+// white surfaces throughout the page.
+const BODY = '#3f5a49';
 
 const Landing: React.FC<Props> = ({ onGetStarted, onLogin }) => {
   const isMobile = useIsMobile();
@@ -71,14 +71,14 @@ const Landing: React.FC<Props> = ({ onGetStarted, onLogin }) => {
         position: 'sticky', top: 0, zIndex: 100,
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
         padding: isMobile ? '13px 20px' : '16px 48px',
-        background: 'rgba(10,15,13,0.9)',
+        background: 'rgba(255,255,255,0.85)',
         backdropFilter: 'blur(12px)',
         WebkitBackdropFilter: 'blur(12px)',
         borderBottom: '1px solid var(--border)',
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
           <Logo size={32} radius={9} />
-          <span style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '17px', color: '#ffffff', letterSpacing: '-0.3px' }}>
+          <span style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '17px', color: 'var(--text-primary)', letterSpacing: '-0.3px' }}>
             AgroSense
           </span>
         </div>
@@ -118,12 +118,13 @@ const Landing: React.FC<Props> = ({ onGetStarted, onLogin }) => {
         overflow: 'hidden',
       }}>
         {/* Real-world hero photo — a farmer checking the field. Drop the image at
-            frontend/public/hero-farm.jpg. The dark gradient (painted on top of
-            the photo) keeps the copy readable, and if the file is ever missing the
-            gradient alone still fades cleanly into the page. */}
+            frontend/public/hero-farm.jpg. A soft white veil (painted on top of the
+            photo) keeps the page white-dominant and the dark copy readable, while
+            the farmer stays gently visible underneath. If the file is ever missing
+            the veil alone still fades cleanly into the page. */}
         <div style={{
           position: 'absolute', inset: 0, zIndex: 0,
-          backgroundImage: 'linear-gradient(180deg, rgba(8,13,10,0.62) 0%, rgba(8,13,10,0.80) 55%, var(--bg-base) 100%), url(/hero-farm.jpg)',
+          backgroundImage: 'linear-gradient(180deg, rgba(245,249,246,0.74) 0%, rgba(245,249,246,0.84) 55%, var(--bg-base) 100%), url(/hero-farm.jpg)',
           backgroundSize: 'cover', backgroundPosition: 'center', backgroundRepeat: 'no-repeat',
           pointerEvents: 'none',
         }} />
@@ -152,7 +153,7 @@ const Landing: React.FC<Props> = ({ onGetStarted, onLogin }) => {
         <h1 className="fade-up" style={{
           fontFamily: 'var(--font-display)',
           fontSize: isMobile ? '36px' : '64px', fontWeight: 700,
-          color: '#ffffff',
+          color: 'var(--text-primary)',
           letterSpacing: isMobile ? '-1px' : '-2px', lineHeight: 1.08,
           marginBottom: '22px',
           animationDelay: '60ms',
@@ -221,7 +222,7 @@ const Landing: React.FC<Props> = ({ onGetStarted, onLogin }) => {
       {/* Features */}
       <section style={{ padding: `0 ${padX} ${sectionGap}` }}>
         <div style={{ textAlign: 'center', marginBottom: isMobile ? '32px' : '48px' }}>
-          <h2 style={{ fontFamily: 'var(--font-display)', fontSize: isMobile ? '27px' : '38px', fontWeight: 700, color: '#ffffff', letterSpacing: '-1px', marginBottom: '12px' }}>
+          <h2 style={{ fontFamily: 'var(--font-display)', fontSize: isMobile ? '27px' : '38px', fontWeight: 700, color: 'var(--text-primary)', letterSpacing: '-1px', marginBottom: '12px' }}>
             Everything your farm <span className="serif-accent" style={{ color: 'var(--accent-primary)' }}>needs</span>
           </h2>
           <p style={{ fontSize: isMobile ? '15px' : '16px', color: BODY, maxWidth: '440px', margin: '0 auto', lineHeight: 1.6 }}>
@@ -258,7 +259,7 @@ const Landing: React.FC<Props> = ({ onGetStarted, onLogin }) => {
       {/* How it works */}
       <section style={{ padding: `0 ${padX} ${sectionGap}` }}>
         <div style={{ textAlign: 'center', marginBottom: isMobile ? '32px' : '48px' }}>
-          <h2 style={{ fontFamily: 'var(--font-display)', fontSize: isMobile ? '27px' : '38px', fontWeight: 700, color: '#ffffff', letterSpacing: '-1px', marginBottom: '12px' }}>
+          <h2 style={{ fontFamily: 'var(--font-display)', fontSize: isMobile ? '27px' : '38px', fontWeight: 700, color: 'var(--text-primary)', letterSpacing: '-1px', marginBottom: '12px' }}>
             Up and running in <span className="serif-accent" style={{ color: 'var(--accent-primary)' }}>minutes</span>
           </h2>
         </div>
@@ -297,8 +298,8 @@ const Landing: React.FC<Props> = ({ onGetStarted, onLogin }) => {
       {/* CTA */}
       <section style={{ padding: `0 ${padX} ${sectionGap}` }}>
         <div style={{
-          background: 'linear-gradient(135deg, #162019 0%, #0f1a12 100%)',
-          border: '1px solid rgba(93,234,138,0.15)',
+          background: 'linear-gradient(135deg, #e9faf0 0%, #ffffff 62%)',
+          border: '1px solid var(--accent-glow)',
           borderRadius: 'var(--radius-xl)', padding: isMobile ? '40px 22px' : '60px',
           textAlign: 'center',
           position: 'relative', overflow: 'hidden',
@@ -309,7 +310,7 @@ const Landing: React.FC<Props> = ({ onGetStarted, onLogin }) => {
             background: 'radial-gradient(ellipse, rgba(93,234,138,0.1) 0%, transparent 70%)',
             pointerEvents: 'none',
           }} />
-          <h2 style={{ fontFamily: 'var(--font-display)', fontSize: isMobile ? '27px' : '40px', fontWeight: 700, color: '#ffffff', letterSpacing: '-1.5px', marginBottom: '16px' }}>
+          <h2 style={{ fontFamily: 'var(--font-display)', fontSize: isMobile ? '27px' : '40px', fontWeight: 700, color: 'var(--text-primary)', letterSpacing: '-1.5px', marginBottom: '16px' }}>
             Ready to grow <span className="serif-accent" style={{ color: 'var(--accent-primary)' }}>smarter?</span>
           </h2>
           <p style={{ fontSize: isMobile ? '15px' : '16px', color: BODY, marginBottom: '30px', lineHeight: 1.6 }}>

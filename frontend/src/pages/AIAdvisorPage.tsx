@@ -124,7 +124,7 @@ const AIAdvisorPage: React.FC = () => {
               <Icon size={13} color={color} />
               <div style={{ flex: 1 }}>
                 <div style={{ fontSize: '10px', color: 'var(--text-muted)' }}>{label}</div>
-                <div style={{ fontSize: '13px', fontWeight: 700, color: value === '—' ? 'var(--text-muted)' : color, fontFamily: 'var(--font-display)' }}>{value}</div>
+                <div style={{ fontSize: '13px', fontWeight: 700, color: value === '—' ? 'var(--text-muted)' : 'var(--text-primary)', fontFamily: 'var(--font-display)' }}>{value}</div>
               </div>
               <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: dotColor(key, live[key]) }} />
             </div>
